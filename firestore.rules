@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == "pupu0106@naver.com";
+    }
+
+    match /notices/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /musicStories/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

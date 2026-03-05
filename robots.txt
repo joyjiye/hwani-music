@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+
+User-agent: Yeti
+Allow: /
+Disallow: /admin.html
+
+Sitemap: https://hwanimusicacademy.web.app/sitemap.xml
