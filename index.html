@@ -1760,6 +1760,13 @@ const auth = firebase.auth();
     v3: { url: '', label: '콩쿠르 영상 2' }
   };
 
+  function isInstagram(url) {
+    return url && (url.includes('instagram.com/p/') || url.includes('instagram.com/reel/'));
+  }
+  function getInstagramEmbedUrl(url) {
+    const clean = url.split('?')[0].replace(/\/$/, '');
+    return clean + '/embed/';
+  }
   function getYouTubeEmbedUrl(url) {
     if (!url) return '';
     // YouTube URL 변환 (watch?v=ID -> embed/ID)
@@ -1773,12 +1780,23 @@ const auth = firebase.auth();
   function openModal(key) {
     const data = videoData[key];
     if (!data || !data.url) {
-      alert('영상 URL이 설정되지 않았습니다.\n관리자 페이지에서 YouTube URL을 등록해주세요.');
+      alert('영상 URL이 설정되지 않았습니다.\n관리자 패널에서 YouTube 또는 인스타그램 URL을 등록해주세요.');
       return;
     }
     const modal = document.getElementById('videoModal');
     const iframe = document.getElementById('modalVideo');
-    iframe.src = getYouTubeEmbedUrl(data.url);
+    if (isInstagram(data.url)) {
+      iframe.src = getInstagramEmbedUrl(data.url);
+      iframe.style.width = '400px';
+      iframe.style.height = '500px';
+      iframe.style.maxWidth = '90vw';
+    } else {
+      iframe.src = getYouTubeEmbedUrl(data.url);
+      iframe.style.width = '90vw';
+      iframe.style.height = '50vw';
+      iframe.style.maxWidth = '900px';
+      iframe.style.maxHeight = '500px';
+    }
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
   }
@@ -1994,6 +2012,11 @@ const auth = firebase.auth();
 
   <!-- 영상관리 탭 -->
   <div id="admin-video" style="padding:20px;display:none;">
+    <div style="padding:10px 14px;background:#FFF8E1;border:1px solid #E8DFD0;border-radius:4px;margin-bottom:16px;font-size:11px;color:#7A7068;line-height:1.8;">
+      📌 <strong>YouTube URL</strong> 예: https://youtu.be/영상ID<br>
+      📌 <strong>인스타그램 URL</strong> 예: https://www.instagram.com/p/게시물ID/<br>
+      두 가지 모두 입력 가능합니다.
+    </div>
     <div style="font-size:12px;color:#7A7068;margin-bottom:16px;line-height:1.8;
                 padding:12px;background:#FFFFF0;border:1px solid #E8DFD0;border-radius:4px;">
       YouTube 영상 URL을 입력하면 자동으로 임베드됩니다.<br>
@@ -2335,8 +2358,12 @@ async function deleteMusicStory(id) {
 
 // ── 영상관리 ─────────────────────────────────────────────
 function ytId(url) {
+  if (!url) return null;
   const m = url.match(/(?:youtu\.be\/|v=|embed\/)([A-Za-z0-9_-]{11})/);
   return m ? m[1] : null;
+}
+function isInstaUrl(url) {
+  return url && (url.includes('instagram.com/p/') || url.includes('instagram.com/reel/'));
 }
 
 async function loadVideoAdmin() {
@@ -2355,7 +2382,7 @@ async function loadVideoAdmin() {
       '<div style="font-size:12px;color:#7A7068;margin-bottom:8px;font-weight:600;">' + (data.label||key) + '</div>' +
       '<input type="text" id="video-label-' + key + '" value="' + (data.label||'') + '" placeholder="영상 레이블" ' +
       'style="width:100%;padding:8px 12px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:8px;outline:none;box-sizing:border-box;border-radius:3px;">' +
-      '<input type="text" id="video-url-' + key + '" value="' + (data.url||'') + '" placeholder="YouTube URL (https://youtu.be/...)" ' +
+      '<input type="text" id="video-url-' + key + '" value="' + (data.url||'') + '" placeholder="YouTube 또는 인스타그램 URL" ' +
       'style="width:100%;padding:8px 12px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:10px;outline:none;box-sizing:border-box;border-radius:3px;">' +
       '<button onclick="saveVideo('' + key + '')" style="width:100%;padding:8px;background:#B8AC00;color:#fff;border:none;cursor:pointer;font-size:12px;border-radius:3px;">저장</button>';
     container.appendChild(div);
@@ -2365,8 +2392,10 @@ async function loadVideoAdmin() {
 async function saveVideo(key) {
   const label = document.getElementById('video-label-' + key).value.trim();
   const url   = document.getElementById('video-url-' + key).value.trim();
-  if (url && !ytId(url)) { alert('올바른 YouTube URL을 입력해주세요.
-예: https://youtu.be/영상ID'); return; }
+  if (url && !ytId(url) && !url.includes('instagram.com')) {
+    alert('올바른 YouTube 또는 인스타그램 URL을 입력해주세요.\n예: https://youtu.be/영상ID\n예: https://www.instagram.com/p/게시물ID/');
+    return;
+  }
   try {
     const ref = db.collection('settings').doc('videos');
     const snap = await ref.get();
