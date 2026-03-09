@@ -4,23 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>화니음악학원 | 피아노 전문</title>
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDp9H-l4CK1LUP-DB2ZauxWWisha53uaNk",
-  authDomain: "hwanimusicacademy.firebaseapp.com",
-  projectId: "hwanimusicacademy",
-  storageBucket: "hwanimusicacademy.firebasestorage.app",
-  messagingSenderId: "287901482074",
-  appId: "1:287901482074:web:8432cd4ec75c6888c5ac63"
-};
-firebase.initializeApp(firebaseConfig);
-var db   = firebase.firestore();
-var auth = firebase.auth();
-</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Serif+KR:wght@300;400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -1060,9 +1043,44 @@ var auth = firebase.auth();
       <div class="section-divider"></div>
     </div>
 
-    <!-- 썸네일 그리드 (Firestore videos 컬렉션에서 동적 로드) -->
-    <div id="video-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px;" class="fade-up">
-      <p style="grid-column:1/-1;text-align:center;font-size:13px;color:var(--gray);padding:40px 0;">영상을 불러오는 중...</p>
+    <!-- ════════════════════════════════════════════════
+     영상 그리드 — 영상을 추가/수정하려면 아래 카드를 복사/편집하세요
+     src="파일경로" 또는 src="https://..." 로 지정
+     ════════════════════════════════════════════════ -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px;" class="fade-up" id="video-gallery">
+
+      <!--
+      ★ 영상 카드 추가 방법:
+        1. 아래 카드 블록 하나를 복사
+        2. src 경로와 레이블(제목) 수정
+        3. 저장 후 재배포
+
+      ★ 영상 파일 경로 예시:
+        - 같은 폴더: src="videos/발표회.mp4"
+        - 외부 URL:  src="https://example.com/video.mp4"
+      -->
+
+      <!-- ★★ 영상 카드 (복사해서 쓰세요) ★★
+      <div class="video-card" data-src="videos/영상파일.mp4" data-label="영상 제목"
+        onclick="openVideoModal(this)"
+        style="cursor:pointer;position:relative;aspect-ratio:16/9;overflow:hidden;
+               background:#111;border:2px solid #E8DFD0;transition:transform 0.3s;"
+        onmouseover="this.style.transform='scale(1.02)'"
+        onmouseout="this.style.transform='scale(1)'">
+        <video src="videos/영상파일.mp4" preload="metadata" muted
+          style="width:100%;height:100%;object-fit:cover;"></video>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;
+                    align-items:center;justify-content:center;background:rgba(0,0,0,0.42);">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="24" fill="rgba(255,255,255,0.18)"/>
+            <polygon points="19,15 37,24 19,33" fill="white"/>
+          </svg>
+          <span style="font-family:'Noto Serif KR',serif;font-size:11px;color:#fff;
+                       letter-spacing:2px;margin-top:10px;">영상 제목</span>
+        </div>
+      </div>
+      ★★ 여기까지 복사 ★★ -->
+
     </div>
 
     <!-- 후기 1 -->
@@ -1101,7 +1119,7 @@ var auth = firebase.auth();
       <div style="padding-left:24px;">
         <p style="font-family:'Noto Serif KR',serif;font-size:14px;color:var(--charcoal);line-height:2.2;font-weight:300;">
           안녕하세요^^ 화니음악학원 입니다 😊<br><br>
-          오늘 전해드릴 소식은 지난 6월 판교에서 열린 '시티학생음악콩쿠르'에서<br>
+          오늘 전해드릴 소식인 지난 6월 판교에서 열린 '시티학생음악콩쿠르'에서<br>
           영풍초 2학년에 다니는 지○가 <strong style="color:#B8AC00;font-weight:600;">2등을 수상</strong>했어요!<br><br>
           그 동안의 노력과 열정을 무대 위에서 멋지게 표현해주었고, 그 결과 값진 상으로 보답을 받았어요.<br>
           특히 저학년 친구인데도 활약이 눈부셨던 무대였어요 ✨
@@ -1114,14 +1132,12 @@ var auth = firebase.auth();
 </section>
 
 <!-- 동영상 모달 -->
-<div id="videoModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;align-items:center;justify-content:center;" onclick="if(event.target===this)closeModal()">
-  <div style="position:relative;width:90%;max-width:860px;">
-    <button onclick="closeModal()" style="position:absolute;top:-40px;right:0;background:none;border:none;color:#fff;font-size:28px;cursor:pointer;font-family:serif;">✕</button>
-    <div id="modalVideoWrap" style="position:relative;width:100%;padding-bottom:56.25%;background:#000;">
-      <iframe id="modalIframe" src="" frameborder="0" allow="autoplay;encrypted-media;fullscreen" allowfullscreen
-        style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;display:none;"></iframe>
-      <video id="modalMp4" src="" controls playsinline
-        style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;display:none;"></video>
+<div id="videoModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;align-items:center;justify-content:center;" onclick="if(event.target===this)closeModal()">
+  <div style="position:relative;width:92%;max-width:900px;">
+    <button onclick="closeModal()" style="position:absolute;top:-42px;right:0;background:none;border:none;color:#fff;font-size:30px;cursor:pointer;line-height:1;">✕</button>
+    <div style="font-family:'Noto Serif KR',serif;font-size:13px;color:#ddd;letter-spacing:2px;margin-bottom:10px;text-align:center;" id="modal-video-label"></div>
+    <div id="modalVideoWrap" style="position:relative;width:100%;background:#000;border-radius:4px;overflow:hidden;">
+      <video id="modalVideo" controls style="width:100%;max-height:72vh;display:block;background:#000;" preload="metadata"></video>
     </div>
   </div>
 </div>
@@ -1728,134 +1744,25 @@ var auth = firebase.auth();
 </footer>
 
 <script>
-  // ── 동적 영상 데이터 (Firestore videos 컬렉션) ──
-  const videoDataMap = {}; // docId -> { url, label }
-
-  function extractYtId(url) {
-    if (!url) return null;
-    const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
-    return m ? m[1] : null;
-  }
-  function isInstagram(url) {
-    return url && (url.includes('instagram.com/p/') || url.includes('instagram.com/reel/'));
-  }
-  function isMp4Url(url) {
-    if (!url) return false;
-    // .mp4로 끝나거나 Firebase Storage 다운로드 URL이면서 mp4인 경우
-    return /\.mp4(\?|$)/i.test(url) || (url.includes('firebasestorage.googleapis.com') && url.includes('.mp4'));
-  }
-  function isDirectVideo(url) {
-    if (!url) return false;
-    // mp4, webm, ogg 등 직접 재생 가능한 동영상 URL
-    return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url) || (url.includes('firebasestorage.googleapis.com'));
-  }
-  function getInstagramEmbedUrl(url) {
-    const clean = url.split('?')[0].replace(/\/$/, '');
-    return clean + '/embed/';
-  }
-  function getYouTubeEmbedUrl(url) {
-    if (!url) return '';
-    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
-    if (match) return 'https://www.youtube.com/embed/' + match[1] + '?autoplay=1&rel=0';
-    if (url.includes('youtube.com/embed/')) return url + (url.includes('?') ? '&autoplay=1' : '?autoplay=1');
-    return url;
-  }
-
-  // Firestore videos 컬렉션에서 영상 로드 → 그리드 렌더링
-  async function loadVideos() {
-    const grid = document.getElementById('video-grid');
-    if (!grid) return;
-    try {
-      const snap = await db.collection('videos').orderBy('order','asc').get();
-      grid.innerHTML = '';
-      if (snap.empty) {
-        grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;font-size:13px;color:var(--gray);padding:40px 0;">등록된 영상이 없습니다.</p>';
-        return;
-      }
-      // 영상 수에 따라 그리드 컬럼 조정
-      const count = snap.size;
-      if (count === 1) grid.style.gridTemplateColumns = '1fr';
-      else if (count === 2) grid.style.gridTemplateColumns = 'repeat(2,1fr)';
-      else grid.style.gridTemplateColumns = 'repeat(3,1fr)';
-
-      snap.forEach(doc => {
-        const d = doc.data();
-        videoDataMap[doc.id] = { url: d.url || '', label: d.label || '' };
-        const ytid = extractYtId(d.url);
-        const isDirect = isDirectVideo(d.url);
-
-        const card = document.createElement('div');
-        card.onclick = function(){ openModal(doc.id); };
-        card.style.cssText = 'cursor:pointer;position:relative;aspect-ratio:16/9;overflow:hidden;background:#111;border:2px solid #E8DFD0;transition:transform 0.3s;';
-        card.onmouseover = function(){ this.style.transform='scale(1.02)'; };
-        card.onmouseout  = function(){ this.style.transform='scale(1)'; };
-
-        // 썸네일: YouTube → 자동 썸네일 / MP4 → video 프리뷰 / 기타 → 아이콘
-        let thumbHtml = '';
-        if (ytid) {
-          thumbHtml = '<img src="https://img.youtube.com/vi/' + ytid + '/hqdefault.jpg" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'">';
-        } else if (isDirect) {
-          thumbHtml = '<video src="' + d.url + '" muted preload="metadata" style="width:100%;height:100%;object-fit:cover;pointer-events:none;" onerror="this.style.display=\'none\'"></video>';
-        }
-
-        card.innerHTML =
-          thumbHtml +
-          '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);">' +
-            '<svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="24" fill="rgba(255,255,255,0.15)"/><polygon points="19,15 37,24 19,33" fill="white"/></svg>' +
-            '<span style="font-family:\'Noto Serif KR\',serif;font-size:11px;color:#fff;letter-spacing:2px;margin-top:10px;">' + (d.label || '영상') + '</span>' +
-          '</div>';
-        grid.appendChild(card);
-      });
-    } catch(e) {
-      console.log('영상 로드 오류:', e);
-      grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;font-size:13px;color:var(--gray);padding:40px 0;">영상을 불러올 수 없습니다.</p>';
-    }
-  }
-
-  function openModal(docId) {
-    const data = videoDataMap[docId];
-    if (!data || !data.url) {
-      alert('영상 URL이 설정되지 않았습니다.\n관리자 패널에서 영상 URL을 등록해주세요.');
-      return;
-    }
-    const modal  = document.getElementById('videoModal');
-    const iframe = document.getElementById('modalIframe');
-    const mp4    = document.getElementById('modalMp4');
-    const wrap   = document.getElementById('modalVideoWrap');
-
-    // 모든 플레이어 숨기기
-    iframe.style.display = 'none'; iframe.src = '';
-    mp4.style.display = 'none'; mp4.src = ''; mp4.pause();
-    wrap.style.paddingBottom = '56.25%'; // 16:9 기본
-
-    if (isDirectVideo(data.url)) {
-      // MP4 / 직접 영상
-      mp4.src = data.url;
-      mp4.style.display = 'block';
-      mp4.play().catch(function(){});
-    } else if (isInstagram(data.url)) {
-      iframe.src = getInstagramEmbedUrl(data.url);
-      iframe.style.display = 'block';
-      wrap.style.paddingBottom = '120%'; // 인스타 세로 비율
-    } else {
-      // YouTube 등 iframe
-      iframe.src = getYouTubeEmbedUrl(data.url);
-      iframe.style.display = 'block';
-    }
-    modal.style.display = 'flex';
+  // ── 영상 모달 ──────────────────────────────────────────
+  function openVideoModal(el) {
+    var src   = el.getAttribute('data-src');
+    var label = el.getAttribute('data-label') || '';
+    var video = document.getElementById('modalVideo');
+    var lbl   = document.getElementById('modal-video-label');
+    video.src = src;
+    if (lbl) lbl.textContent = label;
+    document.getElementById('videoModal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
+    video.play().catch(function(){});
   }
-
   function closeModal() {
-    const modal  = document.getElementById('videoModal');
-    const iframe = document.getElementById('modalIframe');
-    const mp4    = document.getElementById('modalMp4');
-    iframe.src = ''; iframe.style.display = 'none';
-    mp4.pause(); mp4.src = ''; mp4.style.display = 'none';
-    modal.style.display = 'none';
+    var modal = document.getElementById('videoModal');
+    var video = document.getElementById('modalVideo');
+    if (modal) modal.style.display = 'none';
+    if (video) { video.pause(); video.src = ''; }
     document.body.style.overflow = '';
   }
-  document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
 
   // 공지사항 아코디언
   function toggleNotice(id) {
@@ -1903,720 +1810,7 @@ var auth = firebase.auth();
   }
 </script>
 
-<!-- ===== 관리자 패널 ===== -->
-<!-- ===== 관리자 버튼 ===== -->
-<button id="adminBtn" onclick="openAdminLogin()" title="관리자"
-  style="position:fixed;bottom:24px;right:24px;width:44px;height:44px;
-         background:#B8AC00;border-radius:50%;display:flex;align-items:center;
-         justify-content:center;cursor:pointer;z-index:8000;
-         box-shadow:0 4px 16px rgba(0,0,0,0.2);border:none;
-         transition:transform 0.2s;"
-  onmouseover="this.style.transform='scale(1.1)'"
-  onmouseout="this.style.transform='scale(1)'">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-    <circle cx="12" cy="7" r="4"/>
-  </svg>
-</button>
 
-<!-- ===== 관리자 로그인 모달 ===== -->
-<div id="adminLoginModal"
-  style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);
-         z-index:9000;align-items:center;justify-content:center;">
-  <div style="background:#fff;padding:40px;max-width:360px;width:90%;
-              border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-    <h3 style="font-family:'Noto Serif KR',serif;font-size:18px;margin-bottom:6px;
-               color:#1A1410;text-align:center;">관리자 로그인</h3>
-    <p style="font-size:12px;color:#7A7068;text-align:center;margin-bottom:24px;">
-      화니음악학원 관리자 전용</p>
-    <input type="email" id="adminEmail" placeholder="이메일"
-      style="width:100%;padding:12px 16px;border:1px solid #E8DFD0;font-size:14px;
-             margin-bottom:10px;outline:none;box-sizing:border-box;border-radius:4px;"
-      onkeydown="if(event.key==='Enter')document.getElementById('adminPw').focus()">
-    <input type="password" id="adminPw" placeholder="비밀번호"
-      style="width:100%;padding:12px 16px;border:1px solid #E8DFD0;font-size:14px;
-             margin-bottom:16px;outline:none;box-sizing:border-box;border-radius:4px;"
-      onkeydown="if(event.key==='Enter')doAdminLogin()">
-    <div style="display:flex;gap:12px;">
-      <button onclick="doAdminLogin()"
-        style="flex:1;padding:12px;background:#B8AC00;color:#fff;border:none;
-               cursor:pointer;font-size:14px;font-family:'Noto Serif KR',serif;
-               letter-spacing:1px;border-radius:4px;">로그인</button>
-      <button onclick="closeAdminLogin()"
-        style="flex:1;padding:12px;background:#f5f5f5;color:#666;border:none;
-               cursor:pointer;font-size:14px;border-radius:4px;">취소</button>
-    </div>
-    <p id="adminLoginError"
-      style="color:#e74c3c;font-size:12px;margin-top:12px;text-align:center;display:none;">
-      이메일 또는 비밀번호가 올바르지 않습니다.</p>
-  </div>
-</div>
-
-<!-- ===== 관리자 패널 ===== -->
-<div id="adminPanel"
-  style="display:none;position:fixed;top:0;right:0;width:400px;height:100vh;
-         background:#fff;z-index:8500;box-shadow:-8px 0 40px rgba(0,0,0,0.15);
-         overflow-y:auto;font-family:'Noto Sans KR',sans-serif;">
-
-  <!-- 헤더 -->
-  <div style="background:#1A1410;padding:20px 24px;display:flex;align-items:center;
-              justify-content:space-between;position:sticky;top:0;z-index:1;">
-    <div>
-      <span style="color:#B8AC00;font-family:'Noto Serif KR',serif;font-size:16px;
-                   letter-spacing:2px;">관리자 패널</span>
-      <div id="adminUserEmail"
-        style="color:#7A7068;font-size:11px;margin-top:2px;"></div>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <button onclick="doAdminLogout()"
-        style="background:none;border:1px solid #7A7068;color:#7A7068;
-               font-size:11px;padding:4px 10px;cursor:pointer;border-radius:3px;">
-        로그아웃</button>
-      <button onclick="closeAdminPanel()"
-        style="background:none;border:none;color:#fff;font-size:22px;cursor:pointer;">
-        &#x2715;</button>
-    </div>
-  </div>
-
-  <!-- 탭 -->
-  <div style="display:flex;border-bottom:2px solid #E8DFD0;background:#FEFCF8;">
-    <button onclick="switchTab('notice')" id="tab-btn-notice"
-      style="flex:1;padding:12px 6px;border:none;background:none;font-size:12px;
-             cursor:pointer;color:#B8AC00;border-bottom:2px solid #B8AC00;
-             font-family:'Noto Serif KR',serif;letter-spacing:1px;margin-bottom:-2px;">
-      공지사항</button>
-    <button onclick="switchTab('music')" id="tab-btn-music"
-      style="flex:1;padding:12px 6px;border:none;background:none;font-size:12px;
-             cursor:pointer;color:#7A7068;font-family:'Noto Serif KR',serif;letter-spacing:1px;">
-      음악이야기</button>
-    <button onclick="switchTab('video')" id="tab-btn-video"
-      style="flex:1;padding:12px 6px;border:none;background:none;font-size:12px;
-             cursor:pointer;color:#7A7068;font-family:'Noto Serif KR',serif;letter-spacing:1px;">
-      영상관리</button>
-    <button onclick="switchTab('info')" id="tab-btn-info"
-      style="flex:1;padding:12px 6px;border:none;background:none;font-size:12px;
-             cursor:pointer;color:#7A7068;font-family:'Noto Serif KR',serif;letter-spacing:1px;">
-      학원정보</button>
-  </div>
-
-  <!-- 공지사항 탭 -->
-  <div id="admin-notice" style="padding:20px;">
-    <div style="margin-bottom:20px;padding:16px;background:#FFFFF0;
-                border:1px solid #E8DFD0;border-radius:4px;">
-      <div style="font-size:12px;color:#7A7068;margin-bottom:12px;font-weight:600;">
-        새 공지사항 추가</div>
-      <input id="n-badge" type="text" placeholder="배지 (예: 공지, 정보, 이벤트)" value="공지"
-        style="width:100%;padding:8px 12px;border:1px solid #E8DFD0;font-size:13px;
-               margin-bottom:8px;outline:none;box-sizing:border-box;border-radius:3px;">
-      <input id="n-title" type="text" placeholder="제목"
-        style="width:100%;padding:8px 12px;border:1px solid #E8DFD0;font-size:13px;
-               margin-bottom:8px;outline:none;box-sizing:border-box;border-radius:3px;">
-      <textarea id="n-content" placeholder="내용" rows="5"
-        style="width:100%;padding:8px 12px;border:1px solid #E8DFD0;font-size:13px;
-               margin-bottom:8px;outline:none;resize:vertical;box-sizing:border-box;
-               border-radius:3px;"></textarea>
-      <input id="n-date" type="text" placeholder="날짜 (예: 2026.03.06)"
-        style="width:100%;padding:8px 12px;border:1px solid #E8DFD0;font-size:13px;
-               margin-bottom:12px;outline:none;box-sizing:border-box;border-radius:3px;">
-      <button onclick="addNotice()"
-        style="width:100%;padding:10px;background:#B8AC00;color:#fff;border:none;
-               cursor:pointer;font-size:13px;font-family:'Noto Serif KR',serif;
-               letter-spacing:1px;border-radius:3px;">공지사항 추가</button>
-    </div>
-    <div style="font-size:12px;color:#7A7068;margin-bottom:12px;font-weight:600;">
-      등록된 공지사항</div>
-    <div id="notice-list-admin" style="display:flex;flex-direction:column;gap:8px;"></div>
-  </div>
-
-  <!-- 음악이야기 탭 -->
-  <div id="admin-music" style="padding:20px;display:none;">
-    <div style="margin-bottom:20px;padding:16px;background:#FFFFF0;
-                border:1px solid #E8DFD0;border-radius:4px;">
-      <div style="font-size:12px;color:#7A7068;margin-bottom:12px;font-weight:600;">
-        새 음악이야기 추가</div>
-      <input id="ms-badge" type="text" placeholder="배지 (예: 음악이야기)" value="음악이야기"
-        style="width:100%;padding:8px 12px;border:1px solid #E8DFD0;font-size:13px;
-               margin-bottom:8px;outline:none;box-sizing:border-box;border-radius:3px;">
-      <input id="ms-title" type="text" placeholder="제목"
-        style="width:100%;padding:8px 12px;border:1px solid #E8DFD0;font-size:13px;
-               margin-bottom:8px;outline:none;box-sizing:border-box;border-radius:3px;">
-      <textarea id="ms-content" placeholder="내용" rows="5"
-        style="width:100%;padding:8px 12px;border:1px solid #E8DFD0;font-size:13px;
-               margin-bottom:8px;outline:none;resize:vertical;box-sizing:border-box;
-               border-radius:3px;"></textarea>
-      <input id="ms-date" type="text" placeholder="날짜 (예: 2026.03.06)"
-        style="width:100%;padding:8px 12px;border:1px solid #E8DFD0;font-size:13px;
-               margin-bottom:12px;outline:none;box-sizing:border-box;border-radius:3px;">
-      <button onclick="addMusicStory()"
-        style="width:100%;padding:10px;background:#B8AC00;color:#fff;border:none;
-               cursor:pointer;font-size:13px;font-family:'Noto Serif KR',serif;
-               letter-spacing:1px;border-radius:3px;">음악이야기 추가</button>
-    </div>
-    <div style="font-size:12px;color:#7A7068;margin-bottom:12px;font-weight:600;">
-      등록된 음악이야기</div>
-    <div id="music-list-admin" style="display:flex;flex-direction:column;gap:8px;"></div>
-  </div>
-
-  <!-- 영상관리 탭 -->
-  <div id="admin-video" style="padding:20px;display:none;">
-    <!-- 새 영상 추가 폼 -->
-    <div style="margin-bottom:20px;padding:16px;background:#FFFFF0;border:1px solid #E8DFD0;border-radius:4px;">
-      <div style="font-size:12px;color:#7A7068;margin-bottom:12px;font-weight:600;">새 영상 추가</div>
-      <div style="padding:8px 12px;background:#FFF8E1;border-radius:3px;margin-bottom:12px;font-size:11px;color:#7A7068;line-height:1.8;">
-        📌 <strong>YouTube URL</strong> 예: https://youtu.be/영상ID 또는 https://www.youtube.com/watch?v=영상ID<br>
-        📌 <strong>인스타그램 URL</strong> 예: https://www.instagram.com/p/게시물ID/<br>
-        📌 <strong>MP4 직접 URL</strong> 예: Firebase Storage 다운로드 URL (.mp4)<br>
-        세 가지 모두 입력 가능합니다.
-      </div>
-      <input id="vid-label" type="text" placeholder="영상 제목 (예: 2026 봄 발표회)"
-        style="width:100%;padding:8px 12px;border:1px solid #E8DFD0;font-size:13px;margin-bottom:8px;outline:none;box-sizing:border-box;border-radius:3px;">
-      <input id="vid-url" type="text" placeholder="YouTube 또는 인스타그램 URL"
-        style="width:100%;padding:8px 12px;border:1px solid #E8DFD0;font-size:13px;margin-bottom:12px;outline:none;box-sizing:border-box;border-radius:3px;">
-      <button onclick="addVideo()"
-        style="width:100%;padding:10px;background:#B8AC00;color:#fff;border:none;cursor:pointer;font-size:13px;font-family:'Noto Serif KR',serif;letter-spacing:1px;border-radius:3px;">영상 추가</button>
-    </div>
-    <div style="font-size:12px;color:#7A7068;margin-bottom:12px;font-weight:600;">등록된 영상 (드래그로 순서 변경 불가 · 순서는 등록순)</div>
-    <div id="video-list-admin" style="display:flex;flex-direction:column;gap:8px;"></div>
-  </div>
-
-  <!-- 학원정보 탭 -->
-  <div id="admin-info" style="padding:20px;display:none;">
-    <div style="font-size:12px;color:#7A7068;margin-bottom:16px;font-weight:600;">
-      학원 기본 정보 수정</div>
-    <div style="display:flex;flex-direction:column;gap:12px;">
-      <div>
-        <label style="font-size:11px;color:#7A7068;display:block;margin-bottom:4px;">
-          대표 전화</label>
-        <input id="info-phone1" type="text"
-          style="width:100%;padding:8px 12px;border:1px solid #E8DFD0;font-size:13px;
-                 outline:none;box-sizing:border-box;border-radius:3px;">
-      </div>
-      <div>
-        <label style="font-size:11px;color:#7A7068;display:block;margin-bottom:4px;">
-          휴대폰</label>
-        <input id="info-phone2" type="text"
-          style="width:100%;padding:8px 12px;border:1px solid #E8DFD0;font-size:13px;
-                 outline:none;box-sizing:border-box;border-radius:3px;">
-      </div>
-      <div>
-        <label style="font-size:11px;color:#7A7068;display:block;margin-bottom:4px;">
-          운영 시간</label>
-        <input id="info-hours" type="text"
-          style="width:100%;padding:8px 12px;border:1px solid #E8DFD0;font-size:13px;
-                 outline:none;box-sizing:border-box;border-radius:3px;">
-      </div>
-      <div>
-        <label style="font-size:11px;color:#7A7068;display:block;margin-bottom:4px;">
-          주소</label>
-        <input id="info-address" type="text"
-          style="width:100%;padding:8px 12px;border:1px solid #E8DFD0;font-size:13px;
-                 outline:none;box-sizing:border-box;border-radius:3px;">
-      </div>
-      <button onclick="saveInfo()"
-        style="width:100%;padding:10px;background:#B8AC00;color:#fff;border:none;
-               cursor:pointer;font-size:13px;font-family:'Noto Serif KR',serif;
-               letter-spacing:1px;margin-top:8px;border-radius:3px;">정보 저장</button>
-    </div>
-  </div>
-</div>
-
-<!-- ===== 관리자 스크립트 (Firebase Auth + Firestore) ===== -->
-<script>
-// ── Firebase Auth 로그인 ──────────────────────────────────
-function openAdminLogin() {
-  document.getElementById('adminLoginModal').style.display = 'flex';
-}
-function closeAdminLogin() {
-  document.getElementById('adminLoginModal').style.display = 'none';
-  document.getElementById('adminLoginError').style.display = 'none';
-}
-function doAdminLogin() {
-  const email = document.getElementById('adminEmail').value.trim();
-  const pw    = document.getElementById('adminPw').value;
-  if (!email || !pw) { showLoginError(); return; }
-  auth.signInWithEmailAndPassword(email, pw)
-    .then(cred => {
-      closeAdminLogin();
-      openAdminPanel(cred.user.email);
-    })
-    .catch(() => showLoginError());
-}
-function showLoginError() {
-  document.getElementById('adminLoginError').style.display = 'block';
-}
-function doAdminLogout() {
-  auth.signOut().then(() => {
-    document.getElementById('adminPanel').style.display = 'none';
-  });
-}
-
-// ── 패널 열기/닫기 ───────────────────────────────────────
-function openAdminPanel(email) {
-  document.getElementById('adminPanel').style.display = 'block';
-  document.getElementById('adminUserEmail').textContent = email || '';
-  switchTab('notice');
-  loadNoticeAdmin();
-  loadMusicAdmin();
-  loadVideoAdmin();
-  loadInfoAdmin();
-}
-function closeAdminPanel() {
-  document.getElementById('adminPanel').style.display = 'none';
-}
-
-// ── 탭 전환 ──────────────────────────────────────────────
-function switchTab(tab) {
-  ['notice','music','video','info'].forEach(t => {
-    document.getElementById('admin-' + t).style.display = t === tab ? 'block' : 'none';
-    const btn = document.getElementById('tab-btn-' + t);
-    if (btn) {
-      btn.style.color = t === tab ? '#B8AC00' : '#7A7068';
-      btn.style.borderBottom = t === tab ? '2px solid #B8AC00' : 'none';
-    }
-  });
-}
-
-// ── 공지사항 ─────────────────────────────────────────────
-async function loadNoticeAdmin() {
-  const container = document.getElementById('notice-list-admin');
-  container.innerHTML = '<p style="font-size:12px;color:#7A7068;text-align:center;padding:12px;">불러오는 중...</p>';
-  try {
-    const snap = await db.collection('notices').orderBy('date','desc').get();
-    container.innerHTML = '';
-    if (snap.empty) {
-      container.innerHTML = '<p style="font-size:12px;color:#7A7068;text-align:center;padding:20px;">등록된 공지사항이 없습니다.</p>';
-      return;
-    }
-    snap.forEach(doc => {
-      const d = doc.data();
-      const div = document.createElement('div');
-      div.id = 'ni-' + doc.id;
-      div.style.cssText = 'padding:12px;border:1px solid #E8DFD0;border-radius:4px;background:#FEFCF8;margin-bottom:4px;';
-      // 보기 모드
-      const viewDiv = document.createElement('div');
-      viewDiv.id = 'nv-' + doc.id;
-      viewDiv.innerHTML =
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">' +
-        '<div style="flex:1;">' +
-        '<span style="font-size:10px;background:#B8AC00;color:#fff;padding:2px 6px;margin-right:6px;border-radius:2px;">' + (d.badge||'공지') + '</span>' +
-        '<span style="font-size:13px;font-weight:500;">' + (d.title||'') + '</span>' +
-        '<div style="font-size:11px;color:#7A7068;margin-top:4px;">' + (d.date||'') + '</div>' +
-        '</div>' +
-        '<div style="display:flex;gap:4px;flex-shrink:0;">' +
-        '<button onclick="openNE(\'' + doc.id + '\')" style="background:#B8AC00;color:#fff;border:none;padding:4px 10px;cursor:pointer;font-size:11px;border-radius:3px;">수정</button>' +
-        '<button onclick="deleteNotice(\'' + doc.id + '\')" style="background:#e74c3c;color:#fff;border:none;padding:4px 10px;cursor:pointer;font-size:11px;border-radius:3px;">삭제</button>' +
-        '</div></div>';
-      // 편집 모드
-      const editDiv = document.createElement('div');
-      editDiv.id = 'ne-' + doc.id;
-      editDiv.style.display = 'none';
-      editDiv.style.cssText = 'display:none;margin-top:10px;padding-top:10px;border-top:1px solid #E8DFD0;';
-      const badgeInput = document.createElement('input');
-      badgeInput.type = 'text'; badgeInput.id = 'ne-badge-' + doc.id;
-      badgeInput.value = d.badge||'공지'; badgeInput.placeholder = '배지';
-      badgeInput.style.cssText = 'width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:6px;outline:none;box-sizing:border-box;border-radius:3px;';
-      const titleInput = document.createElement('input');
-      titleInput.type = 'text'; titleInput.id = 'ne-title-' + doc.id;
-      titleInput.value = d.title||''; titleInput.placeholder = '제목';
-      titleInput.style.cssText = 'width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:6px;outline:none;box-sizing:border-box;border-radius:3px;';
-      const contentTA = document.createElement('textarea');
-      contentTA.id = 'ne-content-' + doc.id; contentTA.rows = 4;
-      contentTA.placeholder = '내용'; contentTA.textContent = d.content||'';
-      contentTA.style.cssText = 'width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:6px;outline:none;resize:vertical;box-sizing:border-box;border-radius:3px;';
-      const dateInput = document.createElement('input');
-      dateInput.type = 'text'; dateInput.id = 'ne-date-' + doc.id;
-      dateInput.value = d.date||''; dateInput.placeholder = '날짜';
-      dateInput.style.cssText = 'width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:8px;outline:none;box-sizing:border-box;border-radius:3px;';
-      const btnRow = document.createElement('div');
-      btnRow.style.cssText = 'display:flex;gap:6px;';
-      btnRow.innerHTML =
-        '<button onclick="saveNE(\'' + doc.id + '\')" style="flex:1;padding:8px;background:#B8AC00;color:#fff;border:none;cursor:pointer;font-size:12px;border-radius:3px;">저장</button>' +
-        '<button onclick="cancelNE(\'' + doc.id + '\')" style="flex:1;padding:8px;background:#f5f5f5;color:#666;border:none;cursor:pointer;font-size:12px;border-radius:3px;">취소</button>';
-      editDiv.appendChild(badgeInput);
-      editDiv.appendChild(titleInput);
-      editDiv.appendChild(contentTA);
-      editDiv.appendChild(dateInput);
-      editDiv.appendChild(btnRow);
-      div.appendChild(viewDiv);
-      div.appendChild(editDiv);
-      container.appendChild(div);
-    });
-  } catch(e) {
-    container.innerHTML = '<p style="font-size:12px;color:#e74c3c;text-align:center;padding:12px;">불러오기 실패</p>';
-  }
-}
-function openNE(id) {
-  document.getElementById('nv-'+id).style.display = 'none';
-  document.getElementById('ne-'+id).style.display = 'block';
-}
-function cancelNE(id) {
-  document.getElementById('nv-'+id).style.display = 'block';
-  document.getElementById('ne-'+id).style.display = 'none';
-}
-async function saveNE(id) {
-  const badge   = document.getElementById('ne-badge-'+id).value.trim() || '공지';
-  const title   = document.getElementById('ne-title-'+id).value.trim();
-  const content = document.getElementById('ne-content-'+id).value.trim();
-  const date    = document.getElementById('ne-date-'+id).value.trim();
-  if (!title)   { alert('제목을 입력해주세요.'); return; }
-  if (!content) { alert('내용을 입력해주세요.'); return; }
-  try {
-    await db.collection('notices').doc(id).update({ badge, title, content, date });
-    alert('수정되었습니다!');
-    loadNoticeAdmin();
-    if (typeof loadNotices === 'function') loadNotices();
-  } catch(e) { alert('수정 실패: ' + e.message); }
-}
-
-async function addNotice() {
-  const badge   = document.getElementById('n-badge').value.trim() || '공지';
-  const title   = document.getElementById('n-title').value.trim();
-  const content = document.getElementById('n-content').value.trim();
-  const date    = document.getElementById('n-date').value.trim();
-  if (!title)   { alert('제목을 입력해주세요.'); return; }
-  if (!content) { alert('내용을 입력해주세요.'); return; }
-  try {
-    await db.collection('notices').add({ badge, title, content, date, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-    ['n-title','n-content','n-date'].forEach(id => document.getElementById(id).value = '');
-    alert('공지사항이 추가되었습니다!');
-    loadNoticeAdmin();
-    // 홈페이지 목록도 즉시 갱신
-    if (typeof loadNotices === 'function') loadNotices();
-  } catch(e) { alert('추가 실패: ' + e.message); }
-}
-
-async function deleteNotice(id) {
-  if (!confirm('이 공지사항을 삭제하시겠습니까?')) return;
-  try {
-    await db.collection('notices').doc(id).delete();
-    loadNoticeAdmin();
-    if (typeof loadNotices === 'function') loadNotices();
-  } catch(e) { alert('삭제 실패: ' + e.message); }
-}
-
-// ── 음악이야기 ───────────────────────────────────────────
-async function loadMusicAdmin() {
-  const container = document.getElementById('music-list-admin');
-  container.innerHTML = '<p style="font-size:12px;color:#7A7068;text-align:center;padding:12px;">불러오는 중...</p>';
-  try {
-    const snap = await db.collection('musicStories').orderBy('date','desc').get();
-    container.innerHTML = '';
-    if (snap.empty) {
-      container.innerHTML = '<p style="font-size:12px;color:#7A7068;text-align:center;padding:20px;">등록된 음악이야기가 없습니다.</p>';
-      return;
-    }
-    snap.forEach(doc => {
-      const d = doc.data();
-      const div = document.createElement('div');
-      div.id = 'mi-' + doc.id;
-      div.style.cssText = 'padding:12px;border:1px solid #E8DFD0;border-radius:4px;background:#FEFCF8;margin-bottom:4px;';
-      // 보기 모드
-      const viewDiv = document.createElement('div');
-      viewDiv.id = 'mv-' + doc.id;
-      viewDiv.innerHTML =
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">' +
-        '<div style="flex:1;">' +
-        '<span style="font-size:10px;background:#7A7068;color:#fff;padding:2px 6px;margin-right:6px;border-radius:2px;">' + (d.badge||'음악이야기') + '</span>' +
-        '<span style="font-size:13px;font-weight:500;">' + (d.title||'') + '</span>' +
-        '<div style="font-size:11px;color:#7A7068;margin-top:4px;">' + (d.date||'') + '</div>' +
-        '</div>' +
-        '<div style="display:flex;gap:4px;flex-shrink:0;">' +
-        '<button onclick="openME(\'' + doc.id + '\')" style="background:#B8AC00;color:#fff;border:none;padding:4px 10px;cursor:pointer;font-size:11px;border-radius:3px;">수정</button>' +
-        '<button onclick="deleteMusicStory(\'' + doc.id + '\')" style="background:#e74c3c;color:#fff;border:none;padding:4px 10px;cursor:pointer;font-size:11px;border-radius:3px;">삭제</button>' +
-        '</div></div>';
-      // 편집 모드
-      const editDiv = document.createElement('div');
-      editDiv.id = 'me-' + doc.id;
-      editDiv.style.cssText = 'display:none;margin-top:10px;padding-top:10px;border-top:1px solid #E8DFD0;';
-      const badgeInput = document.createElement('input');
-      badgeInput.type = 'text'; badgeInput.id = 'me-badge-' + doc.id;
-      badgeInput.value = d.badge||'음악이야기'; badgeInput.placeholder = '배지';
-      badgeInput.style.cssText = 'width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:6px;outline:none;box-sizing:border-box;border-radius:3px;';
-      const titleInput = document.createElement('input');
-      titleInput.type = 'text'; titleInput.id = 'me-title-' + doc.id;
-      titleInput.value = d.title||''; titleInput.placeholder = '제목';
-      titleInput.style.cssText = 'width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:6px;outline:none;box-sizing:border-box;border-radius:3px;';
-      const contentTA = document.createElement('textarea');
-      contentTA.id = 'me-content-' + doc.id; contentTA.rows = 4;
-      contentTA.placeholder = '내용'; contentTA.textContent = d.content||'';
-      contentTA.style.cssText = 'width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:6px;outline:none;resize:vertical;box-sizing:border-box;border-radius:3px;';
-      const dateInput = document.createElement('input');
-      dateInput.type = 'text'; dateInput.id = 'me-date-' + doc.id;
-      dateInput.value = d.date||''; dateInput.placeholder = '날짜';
-      dateInput.style.cssText = 'width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:8px;outline:none;box-sizing:border-box;border-radius:3px;';
-      const btnRow = document.createElement('div');
-      btnRow.style.cssText = 'display:flex;gap:6px;';
-      btnRow.innerHTML =
-        '<button onclick="saveME(\'' + doc.id + '\')" style="flex:1;padding:8px;background:#B8AC00;color:#fff;border:none;cursor:pointer;font-size:12px;border-radius:3px;">저장</button>' +
-        '<button onclick="cancelME(\'' + doc.id + '\')" style="flex:1;padding:8px;background:#f5f5f5;color:#666;border:none;cursor:pointer;font-size:12px;border-radius:3px;">취소</button>';
-      editDiv.appendChild(badgeInput);
-      editDiv.appendChild(titleInput);
-      editDiv.appendChild(contentTA);
-      editDiv.appendChild(dateInput);
-      editDiv.appendChild(btnRow);
-      div.appendChild(viewDiv);
-      div.appendChild(editDiv);
-      container.appendChild(div);
-    });
-  } catch(e) {
-    container.innerHTML = '<p style="font-size:12px;color:#e74c3c;text-align:center;padding:12px;">불러오기 실패</p>';
-  }
-}
-function openME(id) {
-  document.getElementById('mv-'+id).style.display = 'none';
-  document.getElementById('me-'+id).style.display = 'block';
-}
-function cancelME(id) {
-  document.getElementById('mv-'+id).style.display = 'block';
-  document.getElementById('me-'+id).style.display = 'none';
-}
-async function saveME(id) {
-  const badge   = document.getElementById('me-badge-'+id).value.trim() || '음악이야기';
-  const title   = document.getElementById('me-title-'+id).value.trim();
-  const content = document.getElementById('me-content-'+id).value.trim();
-  const date    = document.getElementById('me-date-'+id).value.trim();
-  if (!title)   { alert('제목을 입력해주세요.'); return; }
-  if (!content) { alert('내용을 입력해주세요.'); return; }
-  try {
-    await db.collection('musicStories').doc(id).update({ badge, title, content, date });
-    alert('수정되었습니다!');
-    loadMusicAdmin();
-    if (typeof loadMusicStories === 'function') loadMusicStories();
-  } catch(e) { alert('수정 실패: ' + e.message); }
-}
-
-async function addMusicStory() {
-  const badge   = document.getElementById('ms-badge').value.trim() || '음악이야기';
-  const title   = document.getElementById('ms-title').value.trim();
-  const content = document.getElementById('ms-content').value.trim();
-  const date    = document.getElementById('ms-date').value.trim();
-  if (!title)   { alert('제목을 입력해주세요.'); return; }
-  if (!content) { alert('내용을 입력해주세요.'); return; }
-  try {
-    await db.collection('musicStories').add({ badge, title, content, date, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-    ['ms-title','ms-content','ms-date'].forEach(id => document.getElementById(id).value = '');
-    alert('음악이야기가 추가되었습니다!');
-    loadMusicAdmin();
-    if (typeof loadMusicStories === 'function') loadMusicStories();
-  } catch(e) { alert('추가 실패: ' + e.message); }
-}
-
-async function deleteMusicStory(id) {
-  if (!confirm('이 음악이야기를 삭제하시겠습니까?')) return;
-  try {
-    await db.collection('musicStories').doc(id).delete();
-    loadMusicAdmin();
-    if (typeof loadMusicStories === 'function') loadMusicStories();
-  } catch(e) { alert('삭제 실패: ' + e.message); }
-}
-
-// ── 영상관리 (videos 컬렉션 CRUD) ──────────────────────────
-function ytId(url) {
-  if (!url) return null;
-  const m = url.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);
-  return m ? m[1] : null;
-}
-function isInstaUrl(url) {
-  return url && (url.includes('instagram.com/p/') || url.includes('instagram.com/reel/'));
-}
-function isDirectVideoUrl(url) {
-  if (!url) return false;
-  return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url) || url.includes('firebasestorage.googleapis.com');
-}
-function isValidVideoUrl(url) {
-  return ytId(url) || isInstaUrl(url) || isDirectVideoUrl(url);
-}
-
-async function loadVideoAdmin() {
-  const container = document.getElementById('video-list-admin');
-  container.innerHTML = '<p style="font-size:12px;color:#7A7068;text-align:center;padding:12px;">불러오는 중...</p>';
-  try {
-    const snap = await db.collection('videos').orderBy('order','asc').get();
-    container.innerHTML = '';
-    if (snap.empty) {
-      container.innerHTML = '<p style="font-size:12px;color:#7A7068;text-align:center;padding:20px;">등록된 영상이 없습니다. 위에서 새 영상을 추가해보세요!</p>';
-      return;
-    }
-    snap.forEach(doc => {
-      const d = doc.data();
-      const div = document.createElement('div');
-      div.id = 'vid-' + doc.id;
-      div.style.cssText = 'padding:12px;border:1px solid #E8DFD0;border-radius:4px;background:#FEFCF8;';
-
-      // 썸네일 미리보기
-      const vid = ytId(d.url);
-      const thumbHtml = vid ? '<img src="https://img.youtube.com/vi/' + vid + '/default.jpg" style="width:60px;height:45px;object-fit:cover;border-radius:3px;flex-shrink:0;">' :
-        (isInstaUrl(d.url) ? '<div style="width:60px;height:45px;background:#E1306C;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0;">📷</div>' :
-        (isDirectVideoUrl(d.url) ? '<div style="width:60px;height:45px;background:#333;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#B8AC00;font-size:16px;flex-shrink:0;">🎬</div>' :
-        '<div style="width:60px;height:45px;background:#ddd;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#999;font-size:10px;flex-shrink:0;">미리보기</div>'));
-
-      // 보기 모드
-      const viewDiv = document.createElement('div');
-      viewDiv.id = 'vv-' + doc.id;
-      viewDiv.innerHTML =
-        '<div style="display:flex;align-items:center;gap:12px;">' +
-          thumbHtml +
-          '<div style="flex:1;min-width:0;">' +
-            '<div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (d.label || '제목 없음') + '</div>' +
-            '<div style="font-size:11px;color:#7A7068;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (d.url || 'URL 없음') + '</div>' +
-          '</div>' +
-          '<div style="display:flex;gap:4px;flex-shrink:0;">' +
-            '<button onclick="openVidEdit(\'' + doc.id + '\')" style="background:#B8AC00;color:#fff;border:none;padding:4px 10px;cursor:pointer;font-size:11px;border-radius:3px;">수정</button>' +
-            '<button onclick="deleteVideo(\'' + doc.id + '\')" style="background:#e74c3c;color:#fff;border:none;padding:4px 10px;cursor:pointer;font-size:11px;border-radius:3px;">삭제</button>' +
-          '</div>' +
-        '</div>';
-
-      // 편집 모드
-      const editDiv = document.createElement('div');
-      editDiv.id = 've-' + doc.id;
-      editDiv.style.cssText = 'display:none;margin-top:10px;padding-top:10px;border-top:1px solid #E8DFD0;';
-      editDiv.innerHTML =
-        '<input type="text" id="ve-label-' + doc.id + '" value="' + (d.label||'').replace(/"/g,'&quot;') + '" placeholder="영상 제목" style="width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:6px;outline:none;box-sizing:border-box;border-radius:3px;">' +
-        '<input type="text" id="ve-url-' + doc.id + '" value="' + (d.url||'').replace(/"/g,'&quot;') + '" placeholder="YouTube 또는 인스타그램 URL" style="width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:8px;outline:none;box-sizing:border-box;border-radius:3px;">' +
-        '<div style="display:flex;gap:6px;">' +
-          '<button onclick="saveVidEdit(\'' + doc.id + '\')" style="flex:1;padding:8px;background:#B8AC00;color:#fff;border:none;cursor:pointer;font-size:12px;border-radius:3px;">저장</button>' +
-          '<button onclick="cancelVidEdit(\'' + doc.id + '\')" style="flex:1;padding:8px;background:#f5f5f5;color:#666;border:none;cursor:pointer;font-size:12px;border-radius:3px;">취소</button>' +
-        '</div>';
-
-      div.appendChild(viewDiv);
-      div.appendChild(editDiv);
-      container.appendChild(div);
-    });
-  } catch(e) {
-    container.innerHTML = '<p style="font-size:12px;color:#e74c3c;text-align:center;padding:12px;">불러오기 실패: ' + e.message + '</p>';
-  }
-}
-
-// 새 영상 추가
-async function addVideo() {
-  const label = document.getElementById('vid-label').value.trim();
-  const url   = document.getElementById('vid-url').value.trim();
-  if (!label) { alert('영상 제목을 입력해주세요.'); return; }
-  if (!url)   { alert('영상 URL을 입력해주세요.'); return; }
-  if (!isValidVideoUrl(url)) {
-    alert('올바른 영상 URL을 입력해주세요.\n예: https://youtu.be/영상ID\n예: https://www.instagram.com/p/게시물ID/\n예: Firebase Storage MP4 URL');
-    return;
-  }
-  try {
-    // order 값: 현재 최대 order + 1
-    let maxOrder = 0;
-    const snap = await db.collection('videos').orderBy('order','desc').limit(1).get();
-    if (!snap.empty) maxOrder = snap.docs[0].data().order || 0;
-    await db.collection('videos').add({
-      label, url,
-      order: maxOrder + 1,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    document.getElementById('vid-label').value = '';
-    document.getElementById('vid-url').value   = '';
-    alert('영상이 추가되었습니다!');
-    loadVideoAdmin();
-    loadVideos();
-  } catch(e) { alert('추가 실패: ' + e.message); }
-}
-
-// 수정 모드 열기/닫기
-function openVidEdit(id) {
-  document.getElementById('vv-'+id).style.display = 'none';
-  document.getElementById('ve-'+id).style.display = 'block';
-}
-function cancelVidEdit(id) {
-  document.getElementById('vv-'+id).style.display = 'block';
-  document.getElementById('ve-'+id).style.display = 'none';
-}
-
-// 수정 저장
-async function saveVidEdit(id) {
-  const label = document.getElementById('ve-label-'+id).value.trim();
-  const url   = document.getElementById('ve-url-'+id).value.trim();
-  if (!label) { alert('영상 제목을 입력해주세요.'); return; }
-  if (url && !isValidVideoUrl(url)) {
-    alert('올바른 영상 URL을 입력해주세요.');
-    return;
-  }
-  try {
-    await db.collection('videos').doc(id).update({ label, url });
-    alert('수정되었습니다!');
-    loadVideoAdmin();
-    loadVideos();
-  } catch(e) { alert('수정 실패: ' + e.message); }
-}
-
-// 삭제
-async function deleteVideo(id) {
-  if (!confirm('이 영상을 삭제하시겠습니까?')) return;
-  try {
-    await db.collection('videos').doc(id).delete();
-    loadVideoAdmin();
-    loadVideos();
-  } catch(e) { alert('삭제 실패: ' + e.message); }
-}
-
-// ── 학원정보 ─────────────────────────────────────────────
-async function loadInfoAdmin() {
-  try {
-    const snap = await db.collection('settings').doc('info').get();
-    if (!snap.exists) return;
-    const d = snap.data();
-    if (d.phone)   document.getElementById('info-phone1').value  = d.phone;
-    if (d.mobile)  document.getElementById('info-phone2').value  = d.mobile;
-    if (d.hours)   document.getElementById('info-hours').value   = d.hours;
-    if (d.address) document.getElementById('info-address').value = d.address;
-  } catch(e) {}
-}
-
-async function saveInfo() {
-  const data = {
-    phone:   document.getElementById('info-phone1').value.trim(),
-    mobile:  document.getElementById('info-phone2').value.trim(),
-    hours:   document.getElementById('info-hours').value.trim(),
-    address: document.getElementById('info-address').value.trim()
-  };
-  try {
-    await db.collection('settings').doc('info').set(data, { merge: true });
-    alert('학원 정보가 저장되었습니다!');
-    if (typeof loadSiteInfo === 'function') loadSiteInfo();
-  } catch(e) { alert('저장 실패: ' + e.message); }
-}
-
-// ── 기존 settings/videos → videos 컬렉션 마이그레이션 ──
-async function migrateOldVideos() {
-  if (typeof db === 'undefined') return;
-  try {
-    const oldSnap = await db.collection('settings').doc('videos').get();
-    if (!oldSnap.exists) return;
-    const oldData = oldSnap.data();
-    // 이미 마이그레이션 됐는지 확인
-    const newSnap = await db.collection('videos').limit(1).get();
-    if (!newSnap.empty) return; // 이미 새 컬렉션에 데이터 있음
-    let order = 1;
-    for (const key of ['v1','v2','v3']) {
-      const v = oldData[key];
-      if (v && v.url) {
-        await db.collection('videos').add({
-          label: v.label || key,
-          url: v.url,
-          order: order++,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      }
-    }
-    console.log('영상 데이터 마이그레이션 완료');
-  } catch(e) { console.log('마이그레이션 스킵:', e.message); }
-}
-
-// ── 페이지 로드 시 Firebase 연동 데이터 불러오기 ─────────
-window.addEventListener('DOMContentLoaded', async function() {
-  if (typeof db === 'undefined') { console.error('Firebase 초기화 실패'); return; }
-  // 기존 영상 데이터 마이그레이션 (최초 1회만 실행됨)
-  await migrateOldVideos();
-  // 공지사항/음악이야기/영상/학원정보 로드
-  if (typeof loadNotices     === 'function') loadNotices();
-  if (typeof loadMusicStories=== 'function') loadMusicStories();
-  if (typeof loadVideos      === 'function') loadVideos();
-  if (typeof loadSiteInfo    === 'function') loadSiteInfo();
-});
-</script>
 
 </body>
 </html>
