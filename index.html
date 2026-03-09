@@ -1067,50 +1067,8 @@ var storage = firebase.storage();
       <p style="grid-column:1/-1;text-align:center;font-size:13px;color:var(--gray);padding:40px 0;">영상을 불러오는 중...</p>
     </div>
 
-    <!-- 후기 1 -->
-    <div class="fade-up" style="margin-top:36px;padding:32px 36px;background:var(--cream);border-left:4px solid #B8AC00;position:relative;">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:36px;color:#B8AC00;line-height:1;position:absolute;top:16px;left:20px;opacity:0.4;">"</div>
-      <div style="padding-left:24px;">
-        <p style="font-family:'Noto Serif KR',serif;font-size:14px;color:var(--charcoal);line-height:2.2;font-weight:300;">
-          소중한 경험을 한 윤○ 입니다.<br><br>
-          우수한 성적으로 수상하였음은 물론, 음악적으로도 한 단계 성장했던 기회였고, 그리고 무엇보다 스스로 연습을 계획하고, 수정해나가고, 어려움을 이겨내고, 무대를 기억하며 설레는 마음을 가지는 시간 속에 무엇과도 바꿀 수 없다는 커다란 성취감을 얻었습니다.<br><br>
-          스스로의 한계를 넘어선 경험은 앞으로 아이의 삶 속에서 커다란 자산이 되어줄 것이며, 언젠가 더 큰 도전을 맞이할 때, 오늘의 기억이 다시 아이를 지탱하는 힘이 될 것이고, 노력 끝에 반드시 해낼 수 있다는 믿음으로 빛날 거라고 믿어요.
-        </p>
-        <div style="margin-top:16px;font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:3px;color:#B8AC00;">— 화니음악학원</div>
-      </div>
-    </div>
-
-    <!-- 후기 2 -->
-    <div class="fade-up" style="margin-top:24px;padding:32px 36px;background:var(--cream);border-left:4px solid #B8AC00;position:relative;">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:36px;color:#B8AC00;line-height:1;position:absolute;top:16px;left:20px;opacity:0.4;">"</div>
-      <div style="padding-left:24px;">
-        <p style="font-family:'Noto Serif KR',serif;font-size:14px;color:var(--charcoal);line-height:2.2;font-weight:300;">
-          안녕하세요 화니음악학원 입니다.<br><br>
-          오늘은 정말 기쁜 소식을 전해드릴게요 🎉<br>
-          우리 3학년 친구가 시티학생음악콩쿠르에서 2등상인 <strong style="color:#B8AC00;font-weight:600;">〈준대상〉</strong>을 수상했습니다! 👍👍<br><br>
-          우리 휘○이와 모든 과정을 함께 했기에 더욱 기특하고 자랑스러운데요!<br>
-          이번 콩쿨 대회를 통해 우리 휘○이는 자신감을 얻었고, 앞으로도 다양한 음악적 경험을 쌓고 싶다는 포부를 밝혔습니다.<br><br>
-          우리 3학년 친구의 다음 목표는 어떤 무대가 될지 기대가 되네요 😊<br>
-          무사히 연주를 잘 마친 우리 휘○이 <strong style="font-weight:600;">준대상 축하해!!! ❤️</strong>
-        </p>
-        <div style="margin-top:16px;font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:3px;color:#B8AC00;">— 화니음악학원</div>
-      </div>
-    </div>
-
-    <!-- 후기 3 -->
-    <div class="fade-up" style="margin-top:24px;padding:32px 36px;background:var(--cream);border-left:4px solid #B8AC00;position:relative;">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:36px;color:#B8AC00;line-height:1;position:absolute;top:16px;left:20px;opacity:0.4;">"</div>
-      <div style="padding-left:24px;">
-        <p style="font-family:'Noto Serif KR',serif;font-size:14px;color:var(--charcoal);line-height:2.2;font-weight:300;">
-          안녕하세요^^ 화니음악학원 입니다 😊<br><br>
-          오늘 전해드릴 소식은 지난 6월 판교에서 열린 '시티학생음악콩쿠르'에서<br>
-          영풍초 2학년에 다니는 지○가 <strong style="color:#B8AC00;font-weight:600;">2등을 수상</strong>했어요!<br><br>
-          그 동안의 노력과 열정을 무대 위에서 멋지게 표현해주었고, 그 결과 값진 상으로 보답을 받았어요.<br>
-          특히 저학년 친구인데도 활약이 눈부셨던 무대였어요 ✨
-        </p>
-        <div style="margin-top:16px;font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:3px;color:#B8AC00;">— 화니음악학원</div>
-      </div>
-    </div>
+    <!-- 콩쿠르 후기 (Firestore reviews 컬렉션에서 동적 로드) -->
+    <div id="reviews-container" style="margin-top:36px;"></div>
 
   </div>
 </section>
@@ -1995,6 +1953,10 @@ var storage = firebase.storage();
       style="flex:1;padding:12px 6px;border:none;background:none;font-size:12px;
              cursor:pointer;color:#7A7068;font-family:'Noto Serif KR',serif;letter-spacing:1px;">
       영상관리</button>
+    <button onclick="switchTab('review')" id="tab-btn-review"
+      style="flex:1;padding:12px 6px;border:none;background:none;font-size:12px;
+             cursor:pointer;color:#7A7068;font-family:'Noto Serif KR',serif;letter-spacing:1px;">
+      콩쿠르</button>
     <button onclick="switchTab('info')" id="tab-btn-info"
       style="flex:1;padding:12px 6px;border:none;background:none;font-size:12px;
              cursor:pointer;color:#7A7068;font-family:'Noto Serif KR',serif;letter-spacing:1px;">
@@ -2096,6 +2058,19 @@ var storage = firebase.storage();
     <div id="video-list-admin" style="display:flex;flex-direction:column;gap:8px;"></div>
   </div>
 
+  <!-- 콩쿠르 후기 탭 -->
+  <div id="admin-review" style="padding:20px;display:none;">
+    <div style="margin-bottom:20px;padding:16px;background:#FFFFF0;border:1px solid #E8DFD0;border-radius:4px;">
+      <div style="font-size:12px;color:#7A7068;margin-bottom:12px;font-weight:600;">새 콩쿠르 후기 추가</div>
+      <textarea id="rv-content" placeholder="후기 내용을 입력하세요 (줄바꿈 시 자동으로 &lt;br&gt; 처리됩니다)" rows="6"
+        style="width:100%;padding:8px 12px;border:1px solid #E8DFD0;font-size:13px;margin-bottom:12px;outline:none;resize:vertical;box-sizing:border-box;border-radius:3px;line-height:1.8;"></textarea>
+      <button onclick="addReview()"
+        style="width:100%;padding:10px;background:#B8AC00;color:#fff;border:none;cursor:pointer;font-size:13px;font-family:'Noto Serif KR',serif;letter-spacing:1px;border-radius:3px;">후기 추가</button>
+    </div>
+    <div style="font-size:12px;color:#7A7068;margin-bottom:12px;font-weight:600;">등록된 후기</div>
+    <div id="review-list-admin" style="display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
+
   <!-- 학원정보 탭 -->
   <div id="admin-info" style="padding:20px;display:none;">
     <div style="font-size:12px;color:#7A7068;margin-bottom:16px;font-weight:600;">
@@ -2175,6 +2150,7 @@ function openAdminPanel(email) {
   loadNoticeAdmin();
   loadMusicAdmin();
   loadVideoAdmin();
+  loadReviewAdmin();
   loadInfoAdmin();
 }
 function closeAdminPanel() {
@@ -2183,7 +2159,7 @@ function closeAdminPanel() {
 
 // ── 탭 전환 ──────────────────────────────────────────────
 function switchTab(tab) {
-  ['notice','music','video','info'].forEach(t => {
+  ['notice','music','video','review','info'].forEach(t => {
     document.getElementById('admin-' + t).style.display = t === tab ? 'block' : 'none';
     const btn = document.getElementById('tab-btn-' + t);
     if (btn) {
@@ -2628,6 +2604,148 @@ async function deleteVideo(id) {
   } catch(e) { alert('삭제 실패: ' + e.message); }
 }
 
+// ── 콩쿠르 후기 (reviews 컬렉션) ─────────────────────────
+// 홈페이지 후기 로드
+async function loadReviews() {
+  const container = document.getElementById('reviews-container');
+  if (!container) return;
+  try {
+    const snap = await db.collection('reviews').orderBy('order','asc').get();
+    container.innerHTML = '';
+    if (snap.empty) return;
+    let first = true;
+    snap.forEach(doc => {
+      const d = doc.data();
+      const div = document.createElement('div');
+      div.className = 'fade-up';
+      div.style.cssText = (first ? 'margin-top:0;' : 'margin-top:24px;') + 'padding:32px 36px;background:var(--cream);border-left:4px solid #B8AC00;position:relative;';
+      div.innerHTML =
+        '<div style="font-family:\'Cormorant Garamond\',serif;font-size:36px;color:#B8AC00;line-height:1;position:absolute;top:16px;left:20px;opacity:0.4;">"</div>' +
+        '<div style="padding-left:24px;">' +
+          '<p style="font-family:\'Noto Serif KR\',serif;font-size:14px;color:var(--charcoal);line-height:2.2;font-weight:300;">' +
+            (d.content || '') +
+          '</p>' +
+          '<div style="margin-top:16px;font-family:\'Cormorant Garamond\',serif;font-size:13px;letter-spacing:3px;color:#B8AC00;">— 화니음악학원</div>' +
+        '</div>';
+      container.appendChild(div);
+      first = false;
+    });
+    // fade-up 옵저버 재적용
+    container.querySelectorAll('.fade-up').forEach(el => {
+      if (typeof observer !== 'undefined') observer.observe(el);
+    });
+  } catch(e) { console.log('후기 로드 오류:', e); }
+}
+
+// 관리자 후기 목록
+async function loadReviewAdmin() {
+  const container = document.getElementById('review-list-admin');
+  if (!container) return;
+  container.innerHTML = '<p style="font-size:12px;color:#7A7068;text-align:center;padding:12px;">불러오는 중...</p>';
+  try {
+    const snap = await db.collection('reviews').orderBy('order','asc').get();
+    container.innerHTML = '';
+    if (snap.empty) {
+      container.innerHTML = '<p style="font-size:12px;color:#7A7068;text-align:center;padding:20px;">등록된 후기가 없습니다.</p>';
+      return;
+    }
+    snap.forEach(doc => {
+      const d = doc.data();
+      const div = document.createElement('div');
+      div.style.cssText = 'padding:12px;border:1px solid #E8DFD0;border-radius:4px;background:#FEFCF8;';
+
+      // 보기 모드
+      const viewDiv = document.createElement('div');
+      viewDiv.id = 'rv-v-' + doc.id;
+      const preview = (d.content || '').replace(/<[^>]*>/g, '').substring(0, 60);
+      viewDiv.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">' +
+          '<div style="flex:1;font-size:13px;color:var(--charcoal);line-height:1.6;overflow:hidden;max-height:40px;">' + preview + '...</div>' +
+          '<div style="display:flex;gap:4px;flex-shrink:0;">' +
+            '<button onclick="openRvEdit(\'' + doc.id + '\')" style="background:#B8AC00;color:#fff;border:none;padding:4px 10px;cursor:pointer;font-size:11px;border-radius:3px;">수정</button>' +
+            '<button onclick="deleteReview(\'' + doc.id + '\')" style="background:#e74c3c;color:#fff;border:none;padding:4px 10px;cursor:pointer;font-size:11px;border-radius:3px;">삭제</button>' +
+          '</div>' +
+        '</div>';
+
+      // 편집 모드
+      const editDiv = document.createElement('div');
+      editDiv.id = 'rv-e-' + doc.id;
+      editDiv.style.cssText = 'display:none;margin-top:10px;padding-top:10px;border-top:1px solid #E8DFD0;';
+      const ta = document.createElement('textarea');
+      ta.id = 'rv-ta-' + doc.id;
+      ta.rows = 6;
+      ta.style.cssText = 'width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:8px;outline:none;resize:vertical;box-sizing:border-box;border-radius:3px;line-height:1.8;';
+      // HTML → 텍스트 (br을 줄바꿈으로)
+      ta.value = (d.content || '').replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '');
+      const btnRow = document.createElement('div');
+      btnRow.style.cssText = 'display:flex;gap:6px;';
+      btnRow.innerHTML =
+        '<button onclick="saveRvEdit(\'' + doc.id + '\')" style="flex:1;padding:8px;background:#B8AC00;color:#fff;border:none;cursor:pointer;font-size:12px;border-radius:3px;">저장</button>' +
+        '<button onclick="cancelRvEdit(\'' + doc.id + '\')" style="flex:1;padding:8px;background:#f5f5f5;color:#666;border:none;cursor:pointer;font-size:12px;border-radius:3px;">취소</button>';
+      editDiv.appendChild(ta);
+      editDiv.appendChild(btnRow);
+
+      div.appendChild(viewDiv);
+      div.appendChild(editDiv);
+      container.appendChild(div);
+    });
+  } catch(e) {
+    container.innerHTML = '<p style="font-size:12px;color:#e74c3c;text-align:center;padding:12px;">불러오기 실패</p>';
+  }
+}
+
+// 새 후기 추가
+async function addReview() {
+  const raw = document.getElementById('rv-content').value.trim();
+  if (!raw) { alert('후기 내용을 입력해주세요.'); return; }
+  const content = raw.replace(/\n/g, '<br>');
+  try {
+    let maxOrder = 0;
+    const snap = await db.collection('reviews').orderBy('order','desc').limit(1).get();
+    if (!snap.empty) maxOrder = snap.docs[0].data().order || 0;
+    await db.collection('reviews').add({
+      content: content,
+      order: maxOrder + 1,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById('rv-content').value = '';
+    alert('후기가 추가되었습니다!');
+    loadReviewAdmin();
+    loadReviews();
+  } catch(e) { alert('추가 실패: ' + e.message); }
+}
+
+// 수정 모드
+function openRvEdit(id) {
+  document.getElementById('rv-v-'+id).style.display = 'none';
+  document.getElementById('rv-e-'+id).style.display = 'block';
+}
+function cancelRvEdit(id) {
+  document.getElementById('rv-v-'+id).style.display = 'block';
+  document.getElementById('rv-e-'+id).style.display = 'none';
+}
+async function saveRvEdit(id) {
+  const raw = document.getElementById('rv-ta-'+id).value.trim();
+  if (!raw) { alert('내용을 입력해주세요.'); return; }
+  const content = raw.replace(/\n/g, '<br>');
+  try {
+    await db.collection('reviews').doc(id).update({ content: content });
+    alert('수정되었습니다!');
+    loadReviewAdmin();
+    loadReviews();
+  } catch(e) { alert('수정 실패: ' + e.message); }
+}
+
+// 삭제
+async function deleteReview(id) {
+  if (!confirm('이 후기를 삭제하시겠습니까?')) return;
+  try {
+    await db.collection('reviews').doc(id).delete();
+    loadReviewAdmin();
+    loadReviews();
+  } catch(e) { alert('삭제 실패: ' + e.message); }
+}
+
 // ── 학원정보 ─────────────────────────────────────────────
 async function loadInfoAdmin() {
   try {
@@ -2681,15 +2799,39 @@ async function migrateOldVideos() {
   } catch(e) { console.log('마이그레이션 스킵:', e.message); }
 }
 
+// ── 기존 후기 마이그레이션 (최초 1회) ──
+async function migrateOldReviews() {
+  if (typeof db === 'undefined') return;
+  try {
+    const existing = await db.collection('reviews').limit(1).get();
+    if (!existing.empty) return;
+    const reviews = [
+      '소중한 경험을 한 윤○ 입니다.<br><br>우수한 성적으로 수상하였음은 물론, 음악적으로도 한 단계 성장했던 기회였고, 그리고 무엇보다 스스로 연습을 계획하고, 수정해나가고, 어려움을 이겨내고, 무대를 기억하며 설레는 마음을 가지는 시간 속에 무엇과도 바꿀 수 없다는 커다란 성취감을 얻었습니다.<br><br>스스로의 한계를 넘어선 경험은 앞으로 아이의 삶 속에서 커다란 자산이 되어줄 것이며, 언젠가 더 큰 도전을 맞이할 때, 오늘의 기억이 다시 아이를 지탱하는 힘이 될 것이고, 노력 끝에 반드시 해낼 수 있다는 믿음으로 빛날 거라고 믿어요.',
+      '안녕하세요 화니음악학원 입니다.<br><br>오늘은 정말 기쁜 소식을 전해드릴게요 🎉<br>우리 3학년 친구가 시티학생음악콩쿠르에서 2등상인 <strong style="color:#B8AC00;font-weight:600;">〈준대상〉</strong>을 수상했습니다! 👍👍<br><br>우리 휘○이와 모든 과정을 함께 했기에 더욱 기특하고 자랑스러운데요!<br>이번 콩쿨 대회를 통해 우리 휘○이는 자신감을 얻었고, 앞으로도 다양한 음악적 경험을 쌓고 싶다는 포부를 밝혔습니다.<br><br>우리 3학년 친구의 다음 목표는 어떤 무대가 될지 기대가 되네요 😊<br>무사히 연주를 잘 마친 우리 휘○이 <strong style="font-weight:600;">준대상 축하해!!! ❤️</strong>',
+      '안녕하세요^^ 화니음악학원 입니다 😊<br><br>오늘 전해드릴 소식은 지난 6월 판교에서 열린 \'시티학생음악콩쿠르\'에서<br>영풍초 2학년에 다니는 지○가 <strong style="color:#B8AC00;font-weight:600;">2등을 수상</strong>했어요!<br><br>그 동안의 노력과 열정을 무대 위에서 멋지게 표현해주었고, 그 결과 값진 상으로 보답을 받았어요.<br>특히 저학년 친구인데도 활약이 눈부셨던 무대였어요 ✨'
+    ];
+    for (let i = 0; i < reviews.length; i++) {
+      await db.collection('reviews').add({
+        content: reviews[i],
+        order: i + 1,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+    console.log('후기 데이터 마이그레이션 완료');
+  } catch(e) { console.log('후기 마이그레이션 스킵:', e.message); }
+}
+
 // ── 페이지 로드 시 Firebase 연동 데이터 불러오기 ─────────
 window.addEventListener('DOMContentLoaded', async function() {
   if (typeof db === 'undefined') { console.error('Firebase 초기화 실패'); return; }
   // 기존 영상 데이터 마이그레이션 (최초 1회만 실행됨)
   await migrateOldVideos();
+  await migrateOldReviews();
   // 공지사항/음악이야기/영상/학원정보 로드
   if (typeof loadNotices     === 'function') loadNotices();
   if (typeof loadMusicStories=== 'function') loadMusicStories();
   if (typeof loadVideos      === 'function') loadVideos();
+  if (typeof loadReviews     === 'function') loadReviews();
   if (typeof loadSiteInfo    === 'function') loadSiteInfo();
 });
 </script>
