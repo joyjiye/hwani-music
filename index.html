@@ -845,6 +845,14 @@ var storage = firebase.storage();
   [id^="ms"] { padding: 16px 12px !important; font-size: 13px !important; }
   img { max-width: 100% !important; }
 }
+
+/* ── ADMIN IMAGE UPLOAD ── */
+.admin-upload-box{border:2px dashed #E8DFD0;border-radius:4px;padding:14px;background:#fff;text-align:center;cursor:pointer;transition:.2s;margin-bottom:8px;}
+.admin-upload-box:hover{border-color:#B8AC00;background:#fffef0;}
+.admin-upload-box p{font-size:12px;color:#7A7068;margin:0;}
+.admin-upload-preview{max-width:100%;max-height:200px;display:none;margin:8px auto 0;border:1px solid #E8DFD0;border-radius:4px;}
+.admin-upload-hint{font-size:11px;color:#7A7068;margin:4px 0 8px;min-height:16px;}
+
 </style>
 </head>
 <body>
@@ -1983,7 +1991,15 @@ var storage = firebase.storage();
                border-radius:3px;"></textarea>
       <input id="n-date" type="text" placeholder="날짜 (예: 2026.03.06)"
         style="width:100%;padding:8px 12px;border:1px solid #E8DFD0;font-size:13px;
-               margin-bottom:12px;outline:none;box-sizing:border-box;border-radius:3px;">
+               margin-bottom:8px;outline:none;box-sizing:border-box;border-radius:3px;">
+      <div class="admin-upload-box" onclick="document.getElementById('n-img-file').click()">
+        <p>이미지 첨부하기 (선택)</p>
+        <img id="n-img-preview" class="admin-upload-preview" alt="">
+      </div>
+      <div id="n-img-size" class="admin-upload-hint"></div>
+      <input type="file" id="n-img-file" accept="image/*" style="display:none;"
+        onchange="compressAndPreview(this,'n-img-preview','n-img-data','n-img-size')">
+      <input type="hidden" id="n-img-data">
       <button onclick="addNotice()"
         style="width:100%;padding:10px;background:#B8AC00;color:#fff;border:none;
                cursor:pointer;font-size:13px;font-family:'Noto Serif KR',serif;
@@ -2012,7 +2028,15 @@ var storage = firebase.storage();
                border-radius:3px;"></textarea>
       <input id="ms-date" type="text" placeholder="날짜 (예: 2026.03.06)"
         style="width:100%;padding:8px 12px;border:1px solid #E8DFD0;font-size:13px;
-               margin-bottom:12px;outline:none;box-sizing:border-box;border-radius:3px;">
+               margin-bottom:8px;outline:none;box-sizing:border-box;border-radius:3px;">
+      <div class="admin-upload-box" onclick="document.getElementById('ms-img-file').click()">
+        <p>이미지 첨부하기 (선택)</p>
+        <img id="ms-img-preview" class="admin-upload-preview" alt="">
+      </div>
+      <div id="ms-img-size" class="admin-upload-hint"></div>
+      <input type="file" id="ms-img-file" accept="image/*" style="display:none;"
+        onchange="compressAndPreview(this,'ms-img-preview','ms-img-data','ms-img-size')">
+      <input type="hidden" id="ms-img-data">
       <button onclick="addMusicStory()"
         style="width:100%;padding:10px;background:#B8AC00;color:#fff;border:none;
                cursor:pointer;font-size:13px;font-family:'Noto Serif KR',serif;
@@ -2171,6 +2195,64 @@ function switchTab(tab) {
   });
 }
 
+
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+function clearAdminImage(prefix) {
+  const data = document.getElementById(prefix + '-img-data');
+  const file = document.getElementById(prefix + '-img-file');
+  const preview = document.getElementById(prefix + '-img-preview');
+  const size = document.getElementById(prefix + '-img-size');
+  if (data) data.value = '';
+  if (file) file.value = '';
+  if (preview) { preview.src = ''; preview.style.display = 'none'; }
+  if (size) size.textContent = '';
+}
+function dataURLtoBlob(dataURL) {
+  const parts = dataURL.split(',');
+  const mime = parts[0].match(/:(.*?);/)[1];
+  const bstr = atob(parts[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) u8arr[n] = bstr.charCodeAt(n);
+  return new Blob([u8arr], {type:mime});
+}
+function compressAndPreview(input, previewId, hiddenId, sizeId) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      let w = img.width, h = img.height;
+      const MAX = 1600;
+      if (w > h && w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+      else if (h >= w && h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      let q = 0.88;
+      let out = canvas.toDataURL('image/jpeg', q);
+      while (out.length > 850000 && q > 0.45) {
+        q -= 0.07;
+        out = canvas.toDataURL('image/jpeg', q);
+      }
+      document.getElementById(previewId).src = out;
+      document.getElementById(previewId).style.display = 'block';
+      document.getElementById(hiddenId).value = out;
+      const kb = Math.round(out.length * 0.75 / 1024);
+      document.getElementById(sizeId).textContent = '압축 후 약 ' + kb + 'KB';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
 // ── 공지사항 ─────────────────────────────────────────────
 async function loadNoticeAdmin() {
   const container = document.getElementById('notice-list-admin');
@@ -2187,51 +2269,41 @@ async function loadNoticeAdmin() {
       const div = document.createElement('div');
       div.id = 'ni-' + doc.id;
       div.style.cssText = 'padding:12px;border:1px solid #E8DFD0;border-radius:4px;background:#FEFCF8;margin-bottom:4px;';
-      // 보기 모드
+      const imgHtml = d.imageUrl ? '<img src="' + d.imageUrl + '" style="width:72px;height:72px;object-fit:cover;border-radius:4px;border:1px solid #E8DFD0;flex-shrink:0;">' : '';
+
       const viewDiv = document.createElement('div');
       viewDiv.id = 'nv-' + doc.id;
       viewDiv.innerHTML =
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">' +
-        '<div style="flex:1;">' +
-        '<span style="font-size:10px;background:#B8AC00;color:#fff;padding:2px 6px;margin-right:6px;border-radius:2px;">' + (d.badge||'공지') + '</span>' +
-        '<span style="font-size:13px;font-weight:500;">' + (d.title||'') + '</span>' +
-        '<div style="font-size:11px;color:#7A7068;margin-top:4px;">' + (d.date||'') + '</div>' +
-        '</div>' +
-        '<div style="display:flex;gap:4px;flex-shrink:0;">' +
-        '<button onclick="openNE(\'' + doc.id + '\')" style="background:#B8AC00;color:#fff;border:none;padding:4px 10px;cursor:pointer;font-size:11px;border-radius:3px;">수정</button>' +
-        '<button onclick="deleteNotice(\'' + doc.id + '\')" style="background:#e74c3c;color:#fff;border:none;padding:4px 10px;cursor:pointer;font-size:11px;border-radius:3px;">삭제</button>' +
-        '</div></div>';
-      // 편집 모드
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">' +
+          imgHtml +
+          '<div style="flex:1;min-width:0;">' +
+            '<span style="font-size:10px;background:#B8AC00;color:#fff;padding:2px 6px;margin-right:6px;border-radius:2px;">' + escapeHtml(d.badge||'공지') + '</span>' +
+            '<span style="font-size:13px;font-weight:500;">' + escapeHtml(d.title||'') + '</span>' +
+            '<div style="font-size:11px;color:#7A7068;margin-top:4px;">' + escapeHtml(d.date||'') + '</div>' +
+          '</div>' +
+          '<div style="display:flex;gap:4px;flex-shrink:0;">' +
+            '<button onclick="openNE(\'' + doc.id + '\')" style="background:#B8AC00;color:#fff;border:none;padding:4px 10px;cursor:pointer;font-size:11px;border-radius:3px;">수정</button>' +
+            '<button onclick="deleteNotice(\'' + doc.id + '\')" style="background:#e74c3c;color:#fff;border:none;padding:4px 10px;cursor:pointer;font-size:11px;border-radius:3px;">삭제</button>' +
+          '</div>' +
+        '</div>';
+
       const editDiv = document.createElement('div');
       editDiv.id = 'ne-' + doc.id;
-      editDiv.style.display = 'none';
       editDiv.style.cssText = 'display:none;margin-top:10px;padding-top:10px;border-top:1px solid #E8DFD0;';
-      const badgeInput = document.createElement('input');
-      badgeInput.type = 'text'; badgeInput.id = 'ne-badge-' + doc.id;
-      badgeInput.value = d.badge||'공지'; badgeInput.placeholder = '배지';
-      badgeInput.style.cssText = 'width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:6px;outline:none;box-sizing:border-box;border-radius:3px;';
-      const titleInput = document.createElement('input');
-      titleInput.type = 'text'; titleInput.id = 'ne-title-' + doc.id;
-      titleInput.value = d.title||''; titleInput.placeholder = '제목';
-      titleInput.style.cssText = 'width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:6px;outline:none;box-sizing:border-box;border-radius:3px;';
-      const contentTA = document.createElement('textarea');
-      contentTA.id = 'ne-content-' + doc.id; contentTA.rows = 4;
-      contentTA.placeholder = '내용'; contentTA.textContent = d.content||'';
-      contentTA.style.cssText = 'width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:6px;outline:none;resize:vertical;box-sizing:border-box;border-radius:3px;';
-      const dateInput = document.createElement('input');
-      dateInput.type = 'text'; dateInput.id = 'ne-date-' + doc.id;
-      dateInput.value = d.date||''; dateInput.placeholder = '날짜';
-      dateInput.style.cssText = 'width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:8px;outline:none;box-sizing:border-box;border-radius:3px;';
-      const btnRow = document.createElement('div');
-      btnRow.style.cssText = 'display:flex;gap:6px;';
-      btnRow.innerHTML =
-        '<button onclick="saveNE(\'' + doc.id + '\')" style="flex:1;padding:8px;background:#B8AC00;color:#fff;border:none;cursor:pointer;font-size:12px;border-radius:3px;">저장</button>' +
-        '<button onclick="cancelNE(\'' + doc.id + '\')" style="flex:1;padding:8px;background:#f5f5f5;color:#666;border:none;cursor:pointer;font-size:12px;border-radius:3px;">취소</button>';
-      editDiv.appendChild(badgeInput);
-      editDiv.appendChild(titleInput);
-      editDiv.appendChild(contentTA);
-      editDiv.appendChild(dateInput);
-      editDiv.appendChild(btnRow);
+      editDiv.innerHTML =
+        '<input type="text" id="ne-badge-' + doc.id + '" value="' + escapeHtml(d.badge||'공지') + '" placeholder="배지" style="width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:6px;outline:none;box-sizing:border-box;border-radius:3px;">' +
+        '<input type="text" id="ne-title-' + doc.id + '" value="' + escapeHtml(d.title||'') + '" placeholder="제목" style="width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:6px;outline:none;box-sizing:border-box;border-radius:3px;">' +
+        '<textarea id="ne-content-' + doc.id + '" rows="4" placeholder="내용" style="width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:6px;outline:none;resize:vertical;box-sizing:border-box;border-radius:3px;">' + escapeHtml(d.content||'') + '</textarea>' +
+        '<input type="text" id="ne-date-' + doc.id + '" value="' + escapeHtml(d.date||'') + '" placeholder="날짜" style="width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:8px;outline:none;box-sizing:border-box;border-radius:3px;">' +
+        '<div class="admin-upload-box" onclick="document.getElementById(\'ne-img-file-' + doc.id + '\').click()"><p>이미지 교체하기 (선택)</p><img id="ne-img-preview-' + doc.id + '" class="admin-upload-preview" ' + (d.imageUrl ? 'src="' + d.imageUrl + '" style="display:block;max-width:100%;max-height:200px;margin:8px auto 0;border:1px solid #E8DFD0;border-radius:4px;"' : 'style="display:none;"') + ' alt=""></div>' +
+        '<div id="ne-img-size-' + doc.id + '" class="admin-upload-hint"></div>' +
+        '<input type="file" id="ne-img-file-' + doc.id + '" accept="image/*" style="display:none;" onchange="compressAndPreview(this,\'ne-img-preview-' + doc.id + '\',\'ne-img-data-' + doc.id + '\',\'ne-img-size-' + doc.id + '\')">' +
+        '<input type="hidden" id="ne-img-data-' + doc.id + '" value="">' +
+        '<div style="display:flex;gap:6px;">' +
+          '<button onclick="saveNE(\'' + doc.id + '\')" style="flex:1;padding:8px;background:#B8AC00;color:#fff;border:none;cursor:pointer;font-size:12px;border-radius:3px;">저장</button>' +
+          '<button onclick="cancelNE(\'' + doc.id + '\')" style="flex:1;padding:8px;background:#f5f5f5;color:#666;border:none;cursor:pointer;font-size:12px;border-radius:3px;">취소</button>' +
+        '</div>';
+
       div.appendChild(viewDiv);
       div.appendChild(editDiv);
       container.appendChild(div);
@@ -2247,39 +2319,49 @@ function openNE(id) {
 function cancelNE(id) {
   document.getElementById('nv-'+id).style.display = 'block';
   document.getElementById('ne-'+id).style.display = 'none';
+  const hidden = document.getElementById('ne-img-data-'+id);
+  const input = document.getElementById('ne-img-file-'+id);
+  const hint = document.getElementById('ne-img-size-'+id);
+  if (hidden) hidden.value = '';
+  if (input) input.value = '';
+  if (hint) hint.textContent = '';
 }
 async function saveNE(id) {
   const badge   = document.getElementById('ne-badge-'+id).value.trim() || '공지';
   const title   = document.getElementById('ne-title-'+id).value.trim();
   const content = document.getElementById('ne-content-'+id).value.trim();
   const date    = document.getElementById('ne-date-'+id).value.trim();
+  const imgData = document.getElementById('ne-img-data-'+id).value;
   if (!title)   { alert('제목을 입력해주세요.'); return; }
   if (!content) { alert('내용을 입력해주세요.'); return; }
+  if (imgData && imgData.length > 900000) { alert('이미지가 너무 큽니다. 더 작은 이미지를 사용해주세요.'); return; }
   try {
-    await db.collection('notices').doc(id).update({ badge, title, content, date });
+    const payload = { badge, title, content, date };
+    if (imgData) payload.imageUrl = imgData;
+    await db.collection('notices').doc(id).update(payload);
     alert('수정되었습니다!');
     loadNoticeAdmin();
     if (typeof loadNotices === 'function') loadNotices();
   } catch(e) { alert('수정 실패: ' + e.message); }
 }
-
 async function addNotice() {
   const badge   = document.getElementById('n-badge').value.trim() || '공지';
   const title   = document.getElementById('n-title').value.trim();
   const content = document.getElementById('n-content').value.trim();
   const date    = document.getElementById('n-date').value.trim();
+  const imgData = document.getElementById('n-img-data').value;
   if (!title)   { alert('제목을 입력해주세요.'); return; }
   if (!content) { alert('내용을 입력해주세요.'); return; }
+  if (imgData && imgData.length > 900000) { alert('이미지가 너무 큽니다. 더 작은 이미지를 사용해주세요.'); return; }
   try {
-    await db.collection('notices').add({ badge, title, content, date, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-    ['n-title','n-content','n-date'].forEach(id => document.getElementById(id).value = '');
+    await db.collection('notices').add({ badge, title, content, date, imageUrl: imgData || '', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    ['n-title','n-content','n-date','n-img-data'].forEach(id => document.getElementById(id).value = '');
+    clearAdminImage('n');
     alert('공지사항이 추가되었습니다!');
     loadNoticeAdmin();
-    // 홈페이지 목록도 즉시 갱신
     if (typeof loadNotices === 'function') loadNotices();
   } catch(e) { alert('추가 실패: ' + e.message); }
 }
-
 async function deleteNotice(id) {
   if (!confirm('이 공지사항을 삭제하시겠습니까?')) return;
   try {
@@ -2305,50 +2387,41 @@ async function loadMusicAdmin() {
       const div = document.createElement('div');
       div.id = 'mi-' + doc.id;
       div.style.cssText = 'padding:12px;border:1px solid #E8DFD0;border-radius:4px;background:#FEFCF8;margin-bottom:4px;';
-      // 보기 모드
+      const imgHtml = d.imageUrl ? '<img src="' + d.imageUrl + '" style="width:72px;height:72px;object-fit:cover;border-radius:4px;border:1px solid #E8DFD0;flex-shrink:0;">' : '';
+
       const viewDiv = document.createElement('div');
       viewDiv.id = 'mv-' + doc.id;
       viewDiv.innerHTML =
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">' +
-        '<div style="flex:1;">' +
-        '<span style="font-size:10px;background:#7A7068;color:#fff;padding:2px 6px;margin-right:6px;border-radius:2px;">' + (d.badge||'음악이야기') + '</span>' +
-        '<span style="font-size:13px;font-weight:500;">' + (d.title||'') + '</span>' +
-        '<div style="font-size:11px;color:#7A7068;margin-top:4px;">' + (d.date||'') + '</div>' +
-        '</div>' +
-        '<div style="display:flex;gap:4px;flex-shrink:0;">' +
-        '<button onclick="openME(\'' + doc.id + '\')" style="background:#B8AC00;color:#fff;border:none;padding:4px 10px;cursor:pointer;font-size:11px;border-radius:3px;">수정</button>' +
-        '<button onclick="deleteMusicStory(\'' + doc.id + '\')" style="background:#e74c3c;color:#fff;border:none;padding:4px 10px;cursor:pointer;font-size:11px;border-radius:3px;">삭제</button>' +
-        '</div></div>';
-      // 편집 모드
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">' +
+          imgHtml +
+          '<div style="flex:1;min-width:0;">' +
+            '<span style="font-size:10px;background:#7A7068;color:#fff;padding:2px 6px;margin-right:6px;border-radius:2px;">' + escapeHtml(d.badge||'음악이야기') + '</span>' +
+            '<span style="font-size:13px;font-weight:500;">' + escapeHtml(d.title||'') + '</span>' +
+            '<div style="font-size:11px;color:#7A7068;margin-top:4px;">' + escapeHtml(d.date||'') + '</div>' +
+          '</div>' +
+          '<div style="display:flex;gap:4px;flex-shrink:0;">' +
+            '<button onclick="openME(\'' + doc.id + '\')" style="background:#B8AC00;color:#fff;border:none;padding:4px 10px;cursor:pointer;font-size:11px;border-radius:3px;">수정</button>' +
+            '<button onclick="deleteMusicStory(\'' + doc.id + '\')" style="background:#e74c3c;color:#fff;border:none;padding:4px 10px;cursor:pointer;font-size:11px;border-radius:3px;">삭제</button>' +
+          '</div>' +
+        '</div>';
+
       const editDiv = document.createElement('div');
       editDiv.id = 'me-' + doc.id;
       editDiv.style.cssText = 'display:none;margin-top:10px;padding-top:10px;border-top:1px solid #E8DFD0;';
-      const badgeInput = document.createElement('input');
-      badgeInput.type = 'text'; badgeInput.id = 'me-badge-' + doc.id;
-      badgeInput.value = d.badge||'음악이야기'; badgeInput.placeholder = '배지';
-      badgeInput.style.cssText = 'width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:6px;outline:none;box-sizing:border-box;border-radius:3px;';
-      const titleInput = document.createElement('input');
-      titleInput.type = 'text'; titleInput.id = 'me-title-' + doc.id;
-      titleInput.value = d.title||''; titleInput.placeholder = '제목';
-      titleInput.style.cssText = 'width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:6px;outline:none;box-sizing:border-box;border-radius:3px;';
-      const contentTA = document.createElement('textarea');
-      contentTA.id = 'me-content-' + doc.id; contentTA.rows = 4;
-      contentTA.placeholder = '내용'; contentTA.textContent = d.content||'';
-      contentTA.style.cssText = 'width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:6px;outline:none;resize:vertical;box-sizing:border-box;border-radius:3px;';
-      const dateInput = document.createElement('input');
-      dateInput.type = 'text'; dateInput.id = 'me-date-' + doc.id;
-      dateInput.value = d.date||''; dateInput.placeholder = '날짜';
-      dateInput.style.cssText = 'width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:8px;outline:none;box-sizing:border-box;border-radius:3px;';
-      const btnRow = document.createElement('div');
-      btnRow.style.cssText = 'display:flex;gap:6px;';
-      btnRow.innerHTML =
-        '<button onclick="saveME(\'' + doc.id + '\')" style="flex:1;padding:8px;background:#B8AC00;color:#fff;border:none;cursor:pointer;font-size:12px;border-radius:3px;">저장</button>' +
-        '<button onclick="cancelME(\'' + doc.id + '\')" style="flex:1;padding:8px;background:#f5f5f5;color:#666;border:none;cursor:pointer;font-size:12px;border-radius:3px;">취소</button>';
-      editDiv.appendChild(badgeInput);
-      editDiv.appendChild(titleInput);
-      editDiv.appendChild(contentTA);
-      editDiv.appendChild(dateInput);
-      editDiv.appendChild(btnRow);
+      editDiv.innerHTML =
+        '<input type="text" id="me-badge-' + doc.id + '" value="' + escapeHtml(d.badge||'음악이야기') + '" placeholder="배지" style="width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:6px;outline:none;box-sizing:border-box;border-radius:3px;">' +
+        '<input type="text" id="me-title-' + doc.id + '" value="' + escapeHtml(d.title||'') + '" placeholder="제목" style="width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:6px;outline:none;box-sizing:border-box;border-radius:3px;">' +
+        '<textarea id="me-content-' + doc.id + '" rows="4" placeholder="내용" style="width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:6px;outline:none;resize:vertical;box-sizing:border-box;border-radius:3px;">' + escapeHtml(d.content||'') + '</textarea>' +
+        '<input type="text" id="me-date-' + doc.id + '" value="' + escapeHtml(d.date||'') + '" placeholder="날짜" style="width:100%;padding:7px 10px;border:1px solid #E8DFD0;font-size:12px;margin-bottom:8px;outline:none;box-sizing:border-box;border-radius:3px;">' +
+        '<div class="admin-upload-box" onclick="document.getElementById(\'me-img-file-' + doc.id + '\').click()"><p>이미지 교체하기 (선택)</p><img id="me-img-preview-' + doc.id + '" class="admin-upload-preview" ' + (d.imageUrl ? 'src="' + d.imageUrl + '" style="display:block;max-width:100%;max-height:200px;margin:8px auto 0;border:1px solid #E8DFD0;border-radius:4px;"' : 'style="display:none;"') + ' alt=""></div>' +
+        '<div id="me-img-size-' + doc.id + '" class="admin-upload-hint"></div>' +
+        '<input type="file" id="me-img-file-' + doc.id + '" accept="image/*" style="display:none;" onchange="compressAndPreview(this,\'me-img-preview-' + doc.id + '\',\'me-img-data-' + doc.id + '\',\'me-img-size-' + doc.id + '\')">' +
+        '<input type="hidden" id="me-img-data-' + doc.id + '" value="">' +
+        '<div style="display:flex;gap:6px;">' +
+          '<button onclick="saveME(\'' + doc.id + '\')" style="flex:1;padding:8px;background:#B8AC00;color:#fff;border:none;cursor:pointer;font-size:12px;border-radius:3px;">저장</button>' +
+          '<button onclick="cancelME(\'' + doc.id + '\')" style="flex:1;padding:8px;background:#f5f5f5;color:#666;border:none;cursor:pointer;font-size:12px;border-radius:3px;">취소</button>' +
+        '</div>';
+
       div.appendChild(viewDiv);
       div.appendChild(editDiv);
       container.appendChild(div);
@@ -2364,38 +2437,49 @@ function openME(id) {
 function cancelME(id) {
   document.getElementById('mv-'+id).style.display = 'block';
   document.getElementById('me-'+id).style.display = 'none';
+  const hidden = document.getElementById('me-img-data-'+id);
+  const input = document.getElementById('me-img-file-'+id);
+  const hint = document.getElementById('me-img-size-'+id);
+  if (hidden) hidden.value = '';
+  if (input) input.value = '';
+  if (hint) hint.textContent = '';
 }
 async function saveME(id) {
   const badge   = document.getElementById('me-badge-'+id).value.trim() || '음악이야기';
   const title   = document.getElementById('me-title-'+id).value.trim();
   const content = document.getElementById('me-content-'+id).value.trim();
   const date    = document.getElementById('me-date-'+id).value.trim();
+  const imgData = document.getElementById('me-img-data-'+id).value;
   if (!title)   { alert('제목을 입력해주세요.'); return; }
   if (!content) { alert('내용을 입력해주세요.'); return; }
+  if (imgData && imgData.length > 900000) { alert('이미지가 너무 큽니다. 더 작은 이미지를 사용해주세요.'); return; }
   try {
-    await db.collection('musicStories').doc(id).update({ badge, title, content, date });
+    const payload = { badge, title, content, date };
+    if (imgData) payload.imageUrl = imgData;
+    await db.collection('musicStories').doc(id).update(payload);
     alert('수정되었습니다!');
     loadMusicAdmin();
     if (typeof loadMusicStories === 'function') loadMusicStories();
   } catch(e) { alert('수정 실패: ' + e.message); }
 }
-
 async function addMusicStory() {
   const badge   = document.getElementById('ms-badge').value.trim() || '음악이야기';
   const title   = document.getElementById('ms-title').value.trim();
   const content = document.getElementById('ms-content').value.trim();
   const date    = document.getElementById('ms-date').value.trim();
+  const imgData = document.getElementById('ms-img-data').value;
   if (!title)   { alert('제목을 입력해주세요.'); return; }
   if (!content) { alert('내용을 입력해주세요.'); return; }
+  if (imgData && imgData.length > 900000) { alert('이미지가 너무 큽니다. 더 작은 이미지를 사용해주세요.'); return; }
   try {
-    await db.collection('musicStories').add({ badge, title, content, date, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-    ['ms-title','ms-content','ms-date'].forEach(id => document.getElementById(id).value = '');
+    await db.collection('musicStories').add({ badge, title, content, date, imageUrl: imgData || '', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    ['ms-title','ms-content','ms-date','ms-img-data'].forEach(id => document.getElementById(id).value = '');
+    clearAdminImage('ms');
     alert('음악이야기가 추가되었습니다!');
     loadMusicAdmin();
     if (typeof loadMusicStories === 'function') loadMusicStories();
   } catch(e) { alert('추가 실패: ' + e.message); }
 }
-
 async function deleteMusicStory(id) {
   if (!confirm('이 음악이야기를 삭제하시겠습니까?')) return;
   try {
