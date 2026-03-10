@@ -1094,6 +1094,7 @@ var storage = firebase.storage();
       <h2 class="section-title">공지사항</h2>
       <div class="section-divider"></div>
     </div>
+    <ul id="notice-dynamic-list" class="notice-list" style="margin-bottom:0;"></ul>
     <ul class="notice-list fade-up">
       <li class="notice-item" style="flex-direction:column;align-items:flex-start;cursor:pointer;" onclick="toggleNotice('n_piano_book')">
         <div style="display:flex;align-items:center;gap:16px;width:100%;">
@@ -1419,6 +1420,7 @@ var storage = firebase.storage();
       <div class="section-divider" style="margin:0 auto 28px;"></div>
     </div>
 
+    <ul id="music-dynamic-list" class="notice-list" style="margin-bottom:0;"></ul>
     <ul class="notice-list fade-up">
 <!-- 공지 쇼팽: 음악이야기 -->
       <li class="notice-item" style="flex-direction:column;align-items:flex-start;cursor:pointer;" onclick="toggleNotice('ms5')">
@@ -2819,6 +2821,76 @@ async function migrateOldReviews() {
     }
     console.log('후기 데이터 마이그레이션 완료');
   } catch(e) { console.log('후기 마이그레이션 스킵:', e.message); }
+}
+
+// ── 공지사항 동적 로드 ────────────────────────────────────
+async function loadNotices() {
+  const container = document.getElementById('notice-dynamic-list');
+  if (!container) return;
+  try {
+    const snap = await db.collection('notices').orderBy('date','desc').get();
+    if (snap.empty) return;
+    snap.forEach(doc => {
+      const d = doc.data();
+      const id = 'nd_' + doc.id;
+      const dateStr = (d.date || '').replace(/-/g, '.');
+      let bodyHtml = '';
+      if (d.imageUrl) {
+        bodyHtml += '<img src="' + d.imageUrl + '" style="max-width:100%;border-radius:4px;margin-bottom:16px;display:block;" alt="">';
+      }
+      bodyHtml += (d.content || '');
+      const li = document.createElement('li');
+      li.className = 'notice-item';
+      li.style.cssText = 'flex-direction:column;align-items:flex-start;cursor:pointer;';
+      li.setAttribute('onclick', "toggleNotice('" + id + "')");
+      li.innerHTML =
+        '<div style="display:flex;align-items:center;gap:16px;width:100%;">' +
+          '<span class="notice-badge">' + (d.badge || '공지') + '</span>' +
+          '<span class="notice-title" style="flex:1;">' + (d.title || '') + '</span>' +
+          '<span class="notice-date">' + dateStr + '</span>' +
+          '<span id="' + id + '-arrow" style="font-size:12px;color:var(--gray);transition:transform 0.3s;">▼</span>' +
+        '</div>' +
+        '<div id="' + id + '" style="display:none;margin-top:20px;padding:24px 20px;background:var(--white);border:1px solid #E8DFD0;width:100%;line-height:2;font-size:14px;color:var(--charcoal);font-family:\'Noto Serif KR\',serif;font-weight:300;">' +
+          bodyHtml +
+        '</div>';
+      container.appendChild(li);
+    });
+  } catch(e) { console.log('공지 로드 오류:', e); }
+}
+
+// ── 음악이야기 동적 로드 ───────────────────────────────────
+async function loadMusicStories() {
+  const container = document.getElementById('music-dynamic-list');
+  if (!container) return;
+  try {
+    const snap = await db.collection('musicStories').orderBy('date','desc').get();
+    if (snap.empty) return;
+    snap.forEach(doc => {
+      const d = doc.data();
+      const id = 'ms_' + doc.id;
+      const dateStr = (d.date || '').replace(/-/g, '.');
+      let bodyHtml = '';
+      if (d.imageUrl) {
+        bodyHtml += '<img src="' + d.imageUrl + '" style="max-width:100%;border-radius:4px;margin-bottom:16px;display:block;" alt="">';
+      }
+      bodyHtml += (d.content || '');
+      const li = document.createElement('li');
+      li.className = 'notice-item';
+      li.style.cssText = 'flex-direction:column;align-items:flex-start;cursor:pointer;';
+      li.setAttribute('onclick', "toggleNotice('" + id + "')");
+      li.innerHTML =
+        '<div style="display:flex;align-items:center;gap:16px;width:100%;">' +
+          '<span class="notice-badge" style="background:#8B7355;">' + (d.badge || '음악이야기') + '</span>' +
+          '<span class="notice-title" style="flex:1;">' + (d.title || '') + '</span>' +
+          '<span class="notice-date">' + dateStr + '</span>' +
+          '<span id="' + id + '-arrow" style="font-size:12px;color:var(--gray);transition:transform 0.3s;">▼</span>' +
+        '</div>' +
+        '<div id="' + id + '" style="display:none;margin-top:20px;padding:24px 20px;background:var(--white);border:1px solid #E8DFD0;width:100%;line-height:2;font-size:14px;color:var(--charcoal);font-family:\'Noto Serif KR\',serif;font-weight:300;">' +
+          bodyHtml +
+        '</div>';
+      container.appendChild(li);
+    });
+  } catch(e) { console.log('음악이야기 로드 오류:', e); }
 }
 
 // ── 페이지 로드 시 Firebase 연동 데이터 불러오기 ─────────
