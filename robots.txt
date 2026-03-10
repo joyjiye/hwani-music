@@ -1,9 +1,12 @@
 User-agent: *
 Allow: /
 Disallow: /admin.html
+Disallow: /__/
+Disallow: /firebase-messaging-sw.js
 
 User-agent: Yeti
 Allow: /
 Disallow: /admin.html
+Disallow: /__/
 
 Sitemap: https://hwanimusicacademy.web.app/sitemap.xml
